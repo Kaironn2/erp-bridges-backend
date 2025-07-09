@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from decimal import Decimal
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -21,11 +24,29 @@ class BuyOrderReportData(BaseModel):
     tracking_code: Optional[str] = Field(alias='Número do Rastreador')
     sold_quantity: int = Field(alias='Qtd. Vendida')
     payment_type: str = Field(alias='Payment Type')
-    shipping_amount: float = Field(alias='Frete')
-    discount: float = Field(alias='Desconto')
-    total_amount: float = Field(alias='Total da Venda')
+    shipping_amount: Decimal = Field(alias='Frete')
+    discount: Decimal = Field(alias='Desconto')
+    total_amount: Decimal = Field(alias='Total da Venda')
 
     customer: CustomerDataFromBuyOrder
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
+
+    @classmethod
+    def from_flat_dict(cls, record: Dict[str, Any]) -> BuyOrderReportData:
+        main_data = {}
+        customer_data = {}
+
+        for field_name, field_info in cls.model_fields.items():
+            if field_name == 'customer':
+                continue
+            source_column = field_info.alias or field_name
+            main_data[field_name] = record.get(source_column)
+
+        for field_name, field_info in CustomerDataFromBuyOrder.model_fields.items():
+            source_column = field_info.alias or field_name
+            customer_data[field_name] = record.get(source_column)
+
+        structured_record = {**main_data, 'customer': customer_data}
+        return cls.model_validate(structured_record)
