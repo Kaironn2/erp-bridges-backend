@@ -4,13 +4,13 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 
 class CustomerDataFromBuyOrder(BaseModel):
     first_name: str = Field(alias='Firstname')
     last_name: str = Field(alias='Lastname')
-    email: EmailStr = Field(alias='Email')
+    email: str = Field(alias='Email')
     customer_group: Optional[str] = Field(alias='Grupo do Cliente')
     cpf: str = Field(alias='Número CPF/CNPJ')
     phone: Optional[str] = Field(alias='Shipping Telephone')
