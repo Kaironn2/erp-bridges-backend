@@ -45,7 +45,7 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         self.df = dfu.keep_only_digits(self.df, self.Meta.keep_only_digits_columns)
         self.df = dfu.lower_case_values(self.df, self.Meta.lower_case_columns)
         self.df = dfu.replace_values(
-            self.df, self.Meta.columns_to_replace_values, self.Meta.mapping_contains
+            self.df, self.Meta.columns_mapping, self.Meta.mapping_contains
         )
         return self.df
 

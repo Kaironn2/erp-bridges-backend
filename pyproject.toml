@@ -9,7 +9,7 @@ dependencies = [
     "djangorestframework>=3.16.0",
     "djangorestframework-simplejwt>=5.5.0",
     "pandas>=2.3.1",
-    "pydantic>=2.11.7",
+    "pydantic[email]>=2.11.7",
     "python-decouple>=3.8",
 ]
 

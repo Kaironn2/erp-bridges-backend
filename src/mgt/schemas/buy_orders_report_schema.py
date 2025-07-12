@@ -46,7 +46,7 @@ class BuyOrderReportData(BaseModel):
 
         for field_name, field_info in CustomerDataFromBuyOrder.model_fields.items():
             source_column = field_info.alias or field_name
-            customer_data[field_name] = record.get(source_column)
+            customer_data[source_column] = record.get(source_column)
 
         structured_record = {**main_data, 'customer': customer_data}
         return cls.model_validate(structured_record)
