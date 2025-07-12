@@ -27,7 +27,7 @@ class MgtBuyOrdersCsvAdapter(BaseReportAdapter[BuyOrderReportData]):
         date_format = '%d/%m/%Y %H:%M:%S'
         keep_only_digits_columns = ['Número CPF/CNPJ', 'Shipping Telephone']
         lower_case_columns = [
-            'Firstname', 'Lastname', 'Email', 'Grupo do Cliente', 'Payment Type'
+            'Firstname', 'Lastname', 'Email', 'Grupo do Cliente', 'Payment Type', 'Status'
         ]
         columns_mapping = {
             'Payment Type': {
