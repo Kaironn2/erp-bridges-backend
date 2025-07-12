@@ -13,6 +13,11 @@ dependencies = [
     "python-decouple>=3.8",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]
+
 [tool.ruff]
 extend-exclude = ['migrations', 'settings.py', 'manage.py']
 line-length = 99
@@ -25,3 +30,8 @@ ignore = ['PLR6301']
 [tool.ruff.format]
 preview = true
 quote-style = 'single'
+
+[tool.pytest.ini_options]
+pythonpath = './src'
+addopts = '-p no:warnings'
+DJANGO_SETTINGS_MODULE = 'core.settings'
