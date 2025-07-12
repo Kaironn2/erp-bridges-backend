@@ -7,6 +7,7 @@ from reports.utils.monetary import to_decimal
 
 class DataFrameUtils:
     """Utily class with static methods for operations with dataframes"""
+
     @staticmethod
     def clean_currency_columns(
         df: pd.DataFrame, columns: List[str], symbol: str = 'R$'
@@ -26,7 +27,8 @@ class DataFrameUtils:
                 continue
 
             cleaned_series = (
-                df[col].astype(str)
+                df[col]
+                .astype(str)
                 .str.replace(symbol, '', regex=False)
                 .str.strip()
                 .str.replace('.', '', regex=False)
@@ -56,9 +58,7 @@ class DataFrameUtils:
 
             if contains:
                 for find_val, replace_val in mapping.items():
-                    mask = df[col].astype(str).str.contains(
-                        find_val, na=False, regex=False
-                    )
+                    mask = df[col].astype(str).str.contains(find_val, na=False, regex=False)
                     df.loc[mask, col] = replace_val
             else:
                 df[col] = df[col].replace(mapping)

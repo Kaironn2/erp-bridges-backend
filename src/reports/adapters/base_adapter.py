@@ -10,7 +10,6 @@ SchemaType = TypeVar('SchemaType', bound=BaseModel)
 
 
 class BaseReportAdapter(ABC, Generic[SchemaType]):
-
     class Meta:
         currency_columns = []
         datetime_columns = []
@@ -58,8 +57,8 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         records = cleaned_df.to_dict(orient='records')
 
         try:
-            if (hasattr(schema_class, 'from_flat_dict') and
-                callable(getattr(schema_class, 'from_flat_dict'))
+            if hasattr(schema_class, 'from_flat_dict') and callable(
+                getattr(schema_class, 'from_flat_dict')
             ):
                 return [schema_class.from_flat_dict(rec) for rec in records]
             else:

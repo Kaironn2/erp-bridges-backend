@@ -9,6 +9,7 @@ class MgtBuyOrdersCsvAdapter(BaseReportAdapter[BuyOrderReportData]):
     read, clean, structures and valid the data
     of csv buy orders report from mgt source
     """
+
     def __init__(self, file_path_or_buffer: str):
         super().__init__(file_path_or_buffer)
 
@@ -27,7 +28,12 @@ class MgtBuyOrdersCsvAdapter(BaseReportAdapter[BuyOrderReportData]):
         date_format = '%d/%m/%Y %H:%M:%S'
         keep_only_digits_columns = ['Número CPF/CNPJ', 'Shipping Telephone']
         lower_case_columns = [
-            'Firstname', 'Lastname', 'Email', 'Grupo do Cliente', 'Payment Type', 'Status'
+            'Firstname',
+            'Lastname',
+            'Email',
+            'Grupo do Cliente',
+            'Payment Type',
+            'Status',
         ]
         columns_mapping = {
             'Payment Type': {

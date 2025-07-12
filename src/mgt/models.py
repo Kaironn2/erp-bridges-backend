@@ -72,9 +72,7 @@ class Status(models.Model):
 
 class BuyOrder(models.Model):
     order_number = models.IntegerField(unique=True)
-    customer = models.ForeignKey(
-        Customer, on_delete=models.PROTECT, related_name='buy_orders'
-    )
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='buy_orders')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -92,11 +90,11 @@ class BuyOrderDetail(models.Model):
     )
     order_external_id = models.IntegerField(unique=True)
     order_date = models.DateTimeField()
-    status = models.ForeignKey(
-        Status, models.PROTECT, related_name='buy_orders_details'
-    )
+    status = models.ForeignKey(Status, models.PROTECT, related_name='buy_orders_details')
     payment_type = models.ForeignKey(
-        PaymentType, models.PROTECT, related_name='buy_orders_details',
+        PaymentType,
+        models.PROTECT,
+        related_name='buy_orders_details',
     )
     shipping_amount = models.DecimalField(max_digits=10, decimal_places=2)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2)
