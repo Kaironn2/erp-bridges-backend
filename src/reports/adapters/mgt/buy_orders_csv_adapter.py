@@ -6,18 +6,18 @@ from reports.adapters.base_adapter import BaseReportAdapter
 
 class MgtBuyOrdersCsvAdapter(BaseReportAdapter[BuyOrderReportData]):
     """
-    This adapter read, clean, structures and valid the data
+    read, clean, structures and valid the data
     of csv buy orders report from mgt source
     """
     def __init__(self, file_path_or_buffer: str):
-        self.file_path_or_buffer = file_path_or_buffer
+        super().__init__(file_path_or_buffer)
 
     def load_raw_data_to_df(self, file_path_or_buffer):
         try:
-            self.df = pd.read_csv(self.file_path, sep=';', dtype=str)
-            self.df.fillna('', inplace=True)
+            df = pd.read_csv(file_path_or_buffer, sep=';', dtype=str)
+            return df.fillna('')
         except FileNotFoundError:
-            raise ValueError(f'File not found in the path: {self.file_path}')
+            raise ValueError(f'File not found in the path: {file_path_or_buffer}')
         except Exception as e:
             raise ValueError(f'Error on read csv file: {e}')
 
@@ -29,7 +29,7 @@ class MgtBuyOrdersCsvAdapter(BaseReportAdapter[BuyOrderReportData]):
         lower_case_columns = [
             'Firstname', 'Lastname', 'Email', 'Grupo do Cliente', 'Payment Type'
         ]
-        columns_to_replace_values = {
+        columns_mapping = {
             'Payment Type': {
                 'pix': 'pix',
                 'cartão': 'cartão de crédito',
@@ -37,3 +37,4 @@ class MgtBuyOrdersCsvAdapter(BaseReportAdapter[BuyOrderReportData]):
                 'necessário': 'saldo',
             }
         }
+        mapping_contains = True

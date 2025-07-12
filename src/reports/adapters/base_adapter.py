@@ -18,6 +18,7 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         keep_only_digits_columns = []
         lower_case_columns = []
         columns_mapping = {}
+        mapping_contains = True
 
     def __init__(self, file_path_or_buffer):
         self.df = self.load_raw_data_to_df(file_path_or_buffer)
@@ -43,7 +44,9 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         )
         self.df = dfu.keep_only_digits(self.df, self.Meta.keep_only_digits_columns)
         self.df = dfu.lower_case_values(self.df, self.Meta.lower_case_columns)
-        self.df = dfu.replace_values(self.df, self.Meta.columns_to_replace_values, contains=True)
+        self.df = dfu.replace_values(
+            self.df, self.Meta.columns_to_replace_values, self.Meta.mapping_contains
+        )
         return self.df
 
     def process(self) -> List[SchemaType]:
