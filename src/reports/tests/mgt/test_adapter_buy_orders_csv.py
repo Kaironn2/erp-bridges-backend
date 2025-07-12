@@ -25,15 +25,26 @@ def header_only_csv_data() -> str:
 
 
 @pytest.fixture
-def invalid_format_csv_data() -> str:
-    """return string with an invalid format"""
+def data_with_missing_required_field() -> str:
+    """
+    Return csv with an empty mandatory field
+    """
     return (
-        'Pedido #;ID do Pedido;Firstname;Lastname;Email;Grupo do Cliente;Número CPF/CNPJ;Comprado Em;Shipping Telephone;Status;Número do Rastreador;Qtd. Vendida;Frete;Desconto;Payment Type;Total da Venda\n'  # noqa: E501
-        '507943839;201414;Luiza;Correia;email-invalido;VIP;091.764.823-40;10-04-2025 22:01:33;(71) 6379-4026;Cancelado;TRACK123;1;R$ 23,24;R$ 0,00;boleto;R$ 85,46'  # noqa: E501
+        "Pedido #;ID do Pedido;Firstname;Lastname;Email;Grupo do Cliente;Número CPF/CNPJ;Shipping Telephone;Status;Número do Rastreador;Qtd. Vendida;Frete;Desconto;Payment Type;Total da Venda\n"  # noqa: E501
+        "507943839;201414;Luiza;Correia;email-valido@teste.com;VIP;091.764.823-40;(71) 6379-4026;Cancelado;TRACK123;1;R$ 23,24;R$ 0,00;boleto;R$ 85,46"  # noqa: E501
     )
 
 
 def test_successful_processing(valid_csv_data):
+    """
+    Tests whether when calling the process method, all processes occur correctly:
+    objects created len; object instance type; data cleaning;
+    conversion of monetary values; conversion to datetime;
+    columns to lower case; suboject customer created;
+
+    Args:
+        valid_csv_data (str): fixture with valid csv data
+    """
     csv_buffer = io.StringIO(valid_csv_data)
     adapter = MgtBuyOrdersCsvAdapter(csv_buffer)
 
@@ -70,19 +81,28 @@ def test_successful_processing(valid_csv_data):
     assert order1.payment_type == 'boleto bancário'
 
     # second order data
-    assert order2.buy_order == "414797776"
+    assert order2.buy_order == '414797776'
     assert order2.status == 'entregue'
     assert order2.payment_type == 'cartão de crédito'
     assert order2.customer.first_name == 'rodrigo'
 
 
 def test_file_not_found_raises_error():
-    pass    # TODO
+    """
+    Tests that instantiating the adapter with a non-existent file path
+    correctly raises a ValueError.
+    """
+    with pytest.raises(ValueError, match='File not found in the path'):
+        MgtBuyOrdersCsvAdapter('inexistent/csv_path.csv')
 
 
-def test_invalid_data_raises_validation_error(invalid_format_csv_data):
-    pass    # TODO
+def test_invalid_data_raises_validation_error(data_with_missing_required_field):
+    csv_buffer = io.StringIO(data_with_missing_required_field)
+    adapter = MgtBuyOrdersCsvAdapter(csv_buffer)
+
+    with pytest.raises(ValueError, match='Pydantic validation error'):
+        adapter.process()
 
 
 def test_empty_or_header_only_file_returns_empty_list(header_only_csv_data):
-    pass    # TODO
+    pass  # TODO
