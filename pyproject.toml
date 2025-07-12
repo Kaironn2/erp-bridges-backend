@@ -16,6 +16,8 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
+    "ruff>=0.12.3",
+    "taskipy>=1.14.1",
 ]
 
 [tool.ruff]
@@ -35,3 +37,8 @@ quote-style = 'single'
 pythonpath = './src'
 addopts = '-p no:warnings'
 DJANGO_SETTINGS_MODULE = 'core.settings'
+
+[tool.taskipy.tasks]
+lint = 'ruff check'
+format = 'ruff format'
+post_format = 'ruff check --fix'
