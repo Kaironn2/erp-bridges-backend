@@ -97,6 +97,12 @@ def test_file_not_found_raises_error():
 
 
 def test_invalid_data_raises_validation_error(data_with_missing_required_field):
+    """
+    Checks whether a ValueError from Pydantic ValidatioError when a field is missing
+
+    Args:
+        data_with_missing_required_field (str): fixture with data missing one field
+    """
     csv_buffer = io.StringIO(data_with_missing_required_field)
     adapter = MgtBuyOrdersCsvAdapter(csv_buffer)
 
@@ -105,4 +111,16 @@ def test_invalid_data_raises_validation_error(data_with_missing_required_field):
 
 
 def test_empty_or_header_only_file_returns_empty_list(header_only_csv_data):
-    pass  # TODO
+    """
+    tests whether an empty list is returned when csv has no data
+    other than the headers
+
+    Args:
+        header_only_csv_data (_type_): empty data csv fixture, only headers
+    """
+    csv_buffer = io.StringIO(header_only_csv_data)
+    adapter = MgtBuyOrdersCsvAdapter(csv_buffer)
+
+    validated_data = adapter.process()
+
+    assert validated_data == []
