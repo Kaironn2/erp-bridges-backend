@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, List, Type, TypeVar
+from typing import Dict, Generic, List, Type, TypeVar
 
 import pandas as pd
 from pydantic import BaseModel, ValidationError
@@ -11,13 +11,13 @@ SchemaType = TypeVar('SchemaType', bound=BaseModel)
 
 class BaseReportAdapter(ABC, Generic[SchemaType]):
     class Meta:
-        currency_columns = []
-        datetime_columns = []
-        date_format = ''
-        keep_only_digits_columns = []
-        lower_case_columns = []
-        columns_mapping = {}
-        mapping_contains = True
+        currency_columns: List[str] = []
+        datetime_columns: List[str] = []
+        date_format: str = ''
+        keep_only_digits_columns: List[str] = []
+        lower_case_columns: List[str] = []
+        columns_mapping: Dict[str, Dict] = {}
+        mapping_contains: bool = True
 
     def __init__(self, file_path_or_buffer):
         self.df = self.load_raw_data_to_df(file_path_or_buffer)
@@ -46,6 +46,7 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         self.df = dfu.replace_values(
             self.df, self.Meta.columns_mapping, self.Meta.mapping_contains
         )
+        self.df = dfu.empty_strings_to_none(self.df)
         return self.df
 
     def process(self) -> List[SchemaType]:
