@@ -12,7 +12,7 @@ class CustomerDataFromBuyOrder(BaseModel):
     last_name: str = Field(alias='Lastname')
     email: str = Field(alias='Email')
     customer_group: str = Field(alias='Grupo do Cliente')
-    cpf: Optional[str] = Field(alias='Número CPF/CNPJ')
+    cpf: str = Field(alias='Número CPF/CNPJ')
     phone: Optional[str] = Field(alias='Shipping Telephone')
 
 
