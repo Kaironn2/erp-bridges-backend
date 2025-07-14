@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
@@ -168,3 +168,15 @@ class DataFrameUtils:
             pd.DataFrame: A new DataFrame with empty strings replaced by np.nan.
         """
         return df.replace(r'^\s*$', None, regex=True)
+
+    @staticmethod
+    def split_column(
+        df: pd.DataFrame,
+        source_column: str,
+        output_columns: Tuple[str, str] = ('first_name', 'last_name'),
+        sep=' ',
+    ) -> pd.DataFrame:
+        split_df = df[source_column].str.split(sep, n=1, expand=True)
+        df[output_columns[0]] = split_df[0]
+        df[output_columns[1]] = split_df[1]
+        return df
