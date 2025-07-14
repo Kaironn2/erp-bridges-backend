@@ -1,6 +1,5 @@
 from typing import Any, Dict, List
 
-import numpy as np
 import pandas as pd
 
 from reports.utils.monetary import to_decimal
@@ -36,7 +35,6 @@ class DataFrameUtils:
 
             cleaned_series = (
                 df[col]
-                .astype(str)
                 .str.replace(symbol, '', regex=False)
                 .str.strip()
                 .str.replace('.', '', regex=False)
@@ -77,7 +75,7 @@ class DataFrameUtils:
 
             if contains:
                 for find_val, replace_val in mapping.items():
-                    mask = df[col].astype(str).str.contains(find_val, na=False, regex=False)
+                    mask = df[col].str.contains(find_val, na=False, regex=False)
                     df.loc[mask, col] = replace_val
             else:
                 df[col] = df[col].replace(mapping)
@@ -132,7 +130,7 @@ class DataFrameUtils:
             if col not in df.columns:
                 continue
 
-            df[col] = df[col].astype(str).str.replace(r'\D', '', regex=True)
+            df[col] = df[col].str.replace(r'\D', '', regex=True)
 
         return df
 
@@ -151,12 +149,12 @@ class DataFrameUtils:
             if col not in df.columns:
                 continue
 
-            df[col] = df[col].astype(str).str.lower()
+            df[col] = df[col].str.lower()
 
         return df
 
     @staticmethod
-    def empty_strings_to_nan(df: pd.DataFrame) -> pd.DataFrame:
+    def empty_strings_to_none(df: pd.DataFrame) -> pd.DataFrame:
         """Replaces empty or whitespace-only strings with np.nan across the DataFrame.
 
         This method uses a regular expression to find all cells containing
@@ -169,4 +167,4 @@ class DataFrameUtils:
         Returns:
             pd.DataFrame: A new DataFrame with empty strings replaced by np.nan.
         """
-        return df.replace(r'^\s*$', np.nan, regex=True)
+        return df.replace(r'^\s*$', None, regex=True)
