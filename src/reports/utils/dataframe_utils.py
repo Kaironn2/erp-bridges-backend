@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 
+import numpy as np
 import pandas as pd
 
 from reports.utils.monetary import to_decimal
@@ -12,15 +13,22 @@ class DataFrameUtils:
     def clean_currency_columns(
         df: pd.DataFrame, columns: List[str], symbol: str = 'R$'
     ) -> pd.DataFrame:
-        """Convert columns with monetary values string to python Decimal object
+        """Converts string-formatted monetary columns to `Decimal` objects.
+
+        This method is designed to clean currency strings in a typical
+        Brazilian format (e.g., "R$ 1.234,56"). It strips the currency
+        symbol, removes thousand separators, and replaces the decimal comma
+        with a period before converting the value to a high-precision Decimal.
 
         Args:
-            df (pd.DataFrame): dataframe with str monetary values
-            columns (List[str]): columns to clean
-            symbol (str, optional): Monetary symbol to replace. Defaults to 'R$'.
+            df (pd.DataFrame): The input DataFrame to process.
+            columns (List[str]): A list of column names to convert.
+            symbol (str, optional): The currency symbol to strip.
+            Defaults to 'R$'.
 
         Returns:
-            pd.DataFrame: returns the dataframe with the columns converted to Decimal
+            pd.DataFrame: The DataFrame with specified columns converted to
+            the `Decimal` data type.
         """
         for col in columns:
             if col not in df.columns:
@@ -42,16 +50,27 @@ class DataFrameUtils:
     def replace_values(
         df: pd.DataFrame, columns_mapping: Dict[str, Dict[str, Any]], contains: bool
     ) -> pd.DataFrame:
-        """Replace values in series using a mapping with source and target values
+        """Replaces values in specified columns based on per-column mappings.
+
+        This method supports two replacement strategies based on the 'contains'
+        flag:
+        - Exact match: Replaces a cell's value only if it exactly matches a
+          key in the mapping dictionary.
+        - Substring match: Replaces a cell's entire value if it contains a
+          key from the mapping dictionary as a substring.
 
         Args:
-            df (pd.DataFrame): dataframe with values to replace
-            columns mapping (Dict[str, Dict[str, Any]]): columns to apply replacements and ur mappings
-            contains (bool): false to exact replacement, true for contains
+            df (pd.DataFrame): The input DataFrame to process.
+            columns_mapping (Dict[str, Dict[str, Any]]): A dictionary where keys
+                are column names and values are the replacement mappings for
+                that column (e.g., {'col_name': {'old_val': 'new_val'}}).
+            contains (bool): The replacement strategy. If False, uses exact
+                matching. If True, uses substring matching.
 
         Returns:
-            pd.DataFrame: dataframe with values replaceds
-        """  # noqa: E501
+            pd.DataFrame: The DataFrame with values replaced in the specified
+            columns.
+        """
         for col, mapping in columns_mapping.items():
             if col not in df.columns:
                 continue
@@ -69,15 +88,21 @@ class DataFrameUtils:
     def convert_to_datetime(
         df: pd.DataFrame, columns: List[str], date_format: str
     ) -> pd.DataFrame:
-        """convert str in the date_format arg to datetime
+        """Converts string columns to datetime objects using a specified format.
+
+        This method leverages pandas.to_datetime with error coercion, which
+        will turn any unparseable date strings into NaT (Not a Time) instead
+        of raising an error.
 
         Args:
-            df (pd.DataFrame): dataframe with values to convert
-            columns (List[str]): columns to apply conversion
-            date_format (str): str values date format
+            df (pd.DataFrame): The input DataFrame to process.
+            columns (List[str]): A list of column names to convert.
+            date_format (str): The expected date format string, following
+            strftime conventions (e.g., '%d/%m/%Y %H:%M:%S').
 
         Returns:
-            pd.DataFrame: dataframe with the values converted in datetime
+            pd.DataFrame: The DataFrame with the specified columns converted
+            to the datetime data type.
         """
         for col in columns:
             if col not in df.columns:
@@ -89,14 +114,19 @@ class DataFrameUtils:
 
     @staticmethod
     def keep_only_digits(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
-        """removes characteres, keeping only numeric digits. Used to phone, CEP etc
+        """Removes all non-digit characters from specified columns.
+
+        This method is ideal for cleaning formatted strings like phone numbers,
+        postal codes (CEP), or document IDs by using a regular expression
+        to strip any character that is not a numeric digit (0-9).
 
         Args:
-            df (pd.DataFrame): dataframe with values to clean
-            columns (List[str]): columns to remove characteres
+            df (pd.DataFrame): The input DataFrame to process.
+            columns (List[str]): A list of column names to clean.
 
         Returns:
-            pd.DataFrame: dataframe with colums containing only numeric digits
+            pd.DataFrame: The DataFrame with the specified columns containing
+            only digits.
         """
         for col in columns:
             if col not in df.columns:
@@ -108,14 +138,14 @@ class DataFrameUtils:
 
     @staticmethod
     def lower_case_values(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
-        """lowercase all values in the columns
+        """Converts string values in specified DataFrame columns to lowercase.
 
         Args:
-            df (pd.DataFrame): dataframe with values to lowercase
-            columns (List[str]): columns to apply lowercase in the values
+            df (pd.DataFrame): The DataFrame to process.
+            columns (List[str]): The names of the columns to convert to lowercase.
 
         Returns:
-            pd.DataFrame: dataframe with lowercase columns values
+            pd.DataFrame: The DataFrame with the specified columns lowercased.
         """
         for col in columns:
             if col not in df.columns:
@@ -124,3 +154,19 @@ class DataFrameUtils:
             df[col] = df[col].astype(str).str.lower()
 
         return df
+
+    @staticmethod
+    def empty_strings_to_nan(df: pd.DataFrame) -> pd.DataFrame:
+        """Replaces empty or whitespace-only strings with np.nan across the DataFrame.
+
+        This method uses a regular expression to find all cells containing
+        either an empty string or only whitespace characters and replaces them
+        with a standard null value (np.nan).
+
+        Args:
+            df (pd.DataFrame): The input DataFrame to be processed.
+
+        Returns:
+            pd.DataFrame: A new DataFrame with empty strings replaced by np.nan.
+        """
+        return df.replace(r'^\s*$', np.nan, regex=True)
