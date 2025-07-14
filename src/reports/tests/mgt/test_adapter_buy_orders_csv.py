@@ -14,7 +14,7 @@ def valid_csv_data() -> str:
     return (
         'Pedido #;ID do Pedido;Firstname;Lastname;Email;Grupo do Cliente;Número CPF/CNPJ;Comprado Em;Shipping Telephone;Status;Número do Rastreador;Qtd. Vendida;Frete;Desconto;Payment Type;Total da Venda\n'  # noqa: E501
         '507943839;201414;Luiza;Correia;luigi32@VIANA.br;VIP;091.764.823-40;10/04/2025 22:01:33;(71) 6379-4026;Cancelado;TRACK123;1;R$ 23,24;R$ 0,00;boleto;R$ 85,46\n'  # noqa: E501
-        '414797776;969693;Rodrigo;Freitas;sarahmendes@carvalho.com;Atacado;594.603.817-66;30/01/2025 22:01:33;81 4959-3103;Entregue;TRACK456;5;R$ 9,81;R$ 13,23;cartão;R$ 493,35'  # noqa: E501
+        '414797776;969693;Rodrigo;Freitas;sarahmendes@carvalho.com;Atacado;594.603.817-66;30/01/2025 22:01:33; - ;Entregue;teste;5;R$ 9,81;R$ 13,23;cartão;R$ 493,35\n'  # noqa: E501
     )
 
 
@@ -85,6 +85,21 @@ def test_successful_processing(valid_csv_data):
     assert order2.status == 'entregue'
     assert order2.payment_type == 'cartão de crédito'
     assert order2.customer.first_name == 'rodrigo'
+
+
+def test_empty_strings_converted_to_none(valid_csv_data):
+    """Checks if empty strings are converted to None after cleaning process
+
+    Args:
+        valid_csv_data (_type_): fixture with valid csv data
+    """
+    csv_buffer = io.StringIO(valid_csv_data)
+    adapter = MgtBuyOrdersCsvAdapter(csv_buffer)
+
+    validated_data = adapter.process()
+
+    order3 = validated_data[1]
+    assert order3.customer.phone is None
 
 
 def test_file_not_found_raises_error():
