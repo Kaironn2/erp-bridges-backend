@@ -172,11 +172,15 @@ class DataFrameUtils:
     @staticmethod
     def split_column(
         df: pd.DataFrame,
-        source_column: str,
-        output_columns: Tuple[str, str] = ('first_name', 'last_name'),
+        columns_mapping: Dict[str, Tuple[str, str]],
         sep=' ',
     ) -> pd.DataFrame:
-        split_df = df[source_column].str.split(sep, n=1, expand=True)
-        df[output_columns[0]] = split_df[0]
-        df[output_columns[1]] = split_df[1]
+        for col, mapping in columns_mapping.items():
+            if col not in df.columns:
+                continue
+
+            split_df = df[col].str.split(sep, n=1, expand=True)
+            df[mapping[0]] = split_df[0]
+            df[mapping[1]] = split_df[1]
+
         return df
