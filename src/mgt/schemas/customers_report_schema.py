@@ -14,7 +14,7 @@ class CustomerReportData(BaseModel):
     cep: Optional[str] = Field(alias='CEP')
     state: Optional[str] = Field(alias='Estado')
     country: Optional[str] = Field(alias='País')
-    customer_since: datetime = Field(alias='Cliente Desde')
+    customer_since: Optional[datetime] = Field(alias='Cliente Desde')
 
     class Config:
         populate_by_name = True
