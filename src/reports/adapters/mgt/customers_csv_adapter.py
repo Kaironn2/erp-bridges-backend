@@ -15,7 +15,7 @@ class MgtCustomersCsvAdapter(BaseReportAdapter[CustomerReportData]):
 
     def load_raw_data_to_df(self, file_path_or_buffer):
         try:
-            df = pd.read_csv(file_path_or_buffer, sep=';', dtype=str)
+            df = pd.read_csv(file_path_or_buffer, sep=',', dtype=str)
             return df.fillna('')
         except Exception as e:
             print(f'Teste {e}')
@@ -24,4 +24,6 @@ class MgtCustomersCsvAdapter(BaseReportAdapter[CustomerReportData]):
         datetime_columns = ['Cliente Desde']
         date_format = '%d/%m/%Y %H:%M:%S'
         keep_only_digits_columns = ['Telefone']
-        lower_case_columns = ['Nome', 'E-mail', 'Grupo', 'Estado', 'País']
+        lower_case_columns = ['Firstname', 'Lastname', 'E-mail', 'Grupo', 'Estado', 'País']
+        split_columns = {'Nome': ('Firstname', 'Lastname')}
+        split_columns_sep = ' '
