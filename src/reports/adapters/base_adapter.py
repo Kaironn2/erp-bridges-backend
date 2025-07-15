@@ -18,9 +18,12 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         lower_case_columns: List[str] = []
         columns_mapping: Dict[str, Dict] = {}
         mapping_contains: bool = True
+        split_columns: Dict[str, Dict] = {}
+        split_columns_sep = ' '
 
     def __init__(self, file_path_or_buffer):
         self.df = self.load_raw_data_to_df(file_path_or_buffer)
+        self._setup_meta()
 
     @abstractmethod
     def load_raw_data_to_df(self, file_path_or_buffer) -> pd.DataFrame:
@@ -36,7 +39,19 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
                 '(e.g., MyAdapter(BaseReportAdapter) with Meta.schema_class = MySchema).'
             )
 
+    def _setup_meta(self) -> None:
+        self.Meta.currency_columns = getattr(self.Meta, 'currency_columns', [])
+        self.Meta.datetime_columns = getattr(self.Meta, 'datetime_columns', [])
+        self.Meta.date_format = getattr(self.Meta, 'date_format', '')
+        self.Meta.keep_only_digits_columns = getattr(self.Meta, 'keep_only_digits_columns', [])
+        self.Meta.lower_case_columns = getattr(self.Meta, 'lower_case_columns', [])
+        self.Meta.columns_mapping = getattr(self.Meta, 'columns_mapping', {})
+        self.Meta.mapping_contains = getattr(self.Meta, 'mapping_contains', False)
+        self.Meta.split_columns = getattr(self.Meta, 'split_columns', {})
+        self.Meta.split_columns_sep = getattr(self.Meta, 'split_columns_sep', False)
+
     def _clean_dataframe(self) -> pd.DataFrame:
+        self.df = dfu.split_column(self.df, self.Meta.split_columns, self.Meta.split_columns_sep)
         self.df = dfu.clean_currency_columns(self.df, self.Meta.currency_columns)
         self.df = dfu.convert_to_datetime(
             self.df, self.Meta.datetime_columns, self.Meta.date_format
