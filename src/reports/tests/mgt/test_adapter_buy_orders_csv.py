@@ -30,8 +30,8 @@ def data_with_missing_required_field() -> str:
     Return csv with an empty mandatory field
     """
     return (
-        "Pedido #;ID do Pedido;Firstname;Lastname;Email;Grupo do Cliente;Número CPF/CNPJ;Shipping Telephone;Status;Número do Rastreador;Qtd. Vendida;Frete;Desconto;Payment Type;Total da Venda\n"  # noqa: E501
-        "507943839;201414;Luiza;Correia;email-valido@teste.com;VIP;091.764.823-40;(71) 6379-4026;Cancelado;TRACK123;1;R$ 23,24;R$ 0,00;boleto;R$ 85,46"  # noqa: E501
+        'Pedido #;ID do Pedido;Firstname;Lastname;Email;Grupo do Cliente;Número CPF/CNPJ;Shipping Telephone;Status;Número do Rastreador;Qtd. Vendida;Frete;Desconto;Payment Type;Total da Venda\n'  # noqa: E501
+        '507943839;201414;Luiza;Correia;email-valido@teste.com;VIP;091.764.823-40;(71) 6379-4026;Cancelado;TRACK123;1;R$ 23,24;R$ 0,00;boleto;R$ 85,46'  # noqa: E501
     )
 
 
