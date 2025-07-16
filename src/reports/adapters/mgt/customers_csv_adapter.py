@@ -17,8 +17,10 @@ class MgtCustomersCsvAdapter(BaseReportAdapter[CustomerReportData]):
         try:
             df = pd.read_csv(file_path_or_buffer, sep=',', dtype=str)
             return df.fillna('')
+        except FileNotFoundError:
+            raise ValueError(f'File not found in the path: {file_path_or_buffer}')
         except Exception as e:
-            print(f'Teste {e}')
+            raise ValueError(f'Error on read csv file: {e}')
 
     class Meta:
         datetime_columns = ['Cliente Desde']
