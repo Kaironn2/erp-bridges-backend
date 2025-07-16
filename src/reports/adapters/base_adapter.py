@@ -43,6 +43,7 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         mapping_contains: bool = True
         split_columns: Dict[str, Dict] = {}
         split_columns_sep = ' '
+        rename_columns: Dict[str, str] = {}
 
     def __init__(self, file_path_or_buffer):
         """Initializes the adapter by loading data and setting up configuration."""
@@ -90,6 +91,7 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         self.replace_contains = getattr(self.Meta, 'replace_contains', False)
         self.split_columns = getattr(self.Meta, 'split_columns', {})
         self.split_separator = getattr(self.Meta, 'split_columns_sep', ' ')
+        self.rename_columns = getattr(self.Meta, 'rename_columns', {})
 
     def _clean_dataframe(self) -> pd.DataFrame:
         """Applies the full cleaning pipeline using pre-configured instance attributes."""
@@ -100,6 +102,7 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         self.df = dfu.lower_case_values(self.df, self.lower_case_columns)
         self.df = dfu.replace_values(self.df, self.replace_mapping, self.replace_contains)
         self.df = dfu.empty_strings_to_none(self.df)
+        self.df = self.df.rename(self.rename_columns)
 
         return self.df
 
@@ -123,11 +126,6 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         records = cleaned_df.to_dict(orient='records')
 
         try:
-            if hasattr(schema_class, 'from_flat_dict') and callable(
-                getattr(schema_class, 'from_flat_dict')
-            ):
-                return [schema_class.from_flat_dict(rec) for rec in records]
-            else:
-                return [schema_class.model_validate(rec) for rec in records]
+            return [schema_class.model_validate(rec) for rec in records]
         except ValidationError as e:
             raise ValueError(f'Pydantic validation error {e}')
