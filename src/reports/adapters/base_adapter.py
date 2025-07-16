@@ -10,7 +10,30 @@ SchemaType = TypeVar('SchemaType', bound=BaseModel)
 
 
 class BaseReportAdapter(ABC, Generic[SchemaType]):
+    """An abstract, generic base class for creating report adapters.
+
+    This class provides a standardized pipeline for reading a data source,
+    cleaning it based on declarative rules, and validating it against a
+    specific Pydantic schema.
+
+    It is designed to be subclassed. The cleaning behavior is configured
+    by overriding the attributes in the inner `Meta` class. The data loading
+    logic must be provided by implementing the `load_raw_data_to_df` method.
+
+    Example of a concrete implementation:
+        class MyCsvAdapter(BaseReportAdapter[MySchema]):
+            class Meta:
+                currency_columns = ['Price']
+                date_format = '%Y-%m-%d'
+
+            def load_raw_data_to_df(self, file_path):
+                return pd.read_csv(file_path)
+    """
     class Meta:
+        """
+        Inner class for declarative configuration of the cleaning pipeline.
+        Subclasses should override these attributes as needed.
+        """
         currency_columns: List[str] = []
         datetime_columns: List[str] = []
         date_format: str = ''
@@ -22,14 +45,28 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         split_columns_sep = ' '
 
     def __init__(self, file_path_or_buffer):
+        """Initializes the adapter by loading data and setting up configuration."""
         self.df = self.load_raw_data_to_df(file_path_or_buffer)
         self._setup_meta()
 
     @abstractmethod
     def load_raw_data_to_df(self, file_path_or_buffer) -> pd.DataFrame:
+        """Abstract method to be implemented by subclasses.
+
+        Its responsibility is to read a data source (e.g., a CSV, Excel file,
+        or database query) and return it as a pandas DataFrame.
+
+        Args:
+            file_path_or_buffer: The source of the data, e.g., a file path
+                or an in-memory buffer.
+
+        Returns:
+            pd.DataFrame: The loaded data as a pandas DataFrame.
+        """
         raise NotImplementedError
 
     def _get_schema_class(self) -> Type[SchemaType]:
+        """Introspects the subclass to find the concrete Pydantic schema type."""
         try:
             return self.__class__.__orig_bases__[0].__args__[0]
         except (AttributeError, IndexError):
@@ -39,7 +76,11 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
                 '(e.g., MyAdapter(BaseReportAdapter) with Meta.schema_class = MySchema).'
             )
 
-    def _setup_meta(self) -> None:
+    def _setup_config(self) -> None:
+        """
+        Reads configurations from the Meta class and sets them as instance
+        attributes, providing safe defaults for any missing values.
+        """
         self.Meta.currency_columns = getattr(self.Meta, 'currency_columns', [])
         self.Meta.datetime_columns = getattr(self.Meta, 'datetime_columns', [])
         self.Meta.date_format = getattr(self.Meta, 'date_format', '')
@@ -51,6 +92,7 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         self.Meta.split_columns_sep = getattr(self.Meta, 'split_columns_sep', False)
 
     def _clean_dataframe(self) -> pd.DataFrame:
+        """Applies the full cleaning pipeline using pre-configured instance attributes."""
         self.df = dfu.split_column(self.df, self.Meta.split_columns, self.Meta.split_columns_sep)
         self.df = dfu.clean_currency_columns(self.df, self.Meta.currency_columns)
         self.df = dfu.convert_to_datetime(
@@ -65,6 +107,17 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         return self.df
 
     def process(self) -> List[SchemaType]:
+        """Orchestrates the cleaning, structuring, and validation of the data.
+
+        This is the main public method that executes the full ETL pipeline for the
+        adapter, returning a list of validated Pydantic objects.
+
+        Returns:
+            List[SchemaType]: A list of validated Pydantic model instances.
+
+        Raises:
+            ValueError: If Pydantic validation fails for any row.
+        """
         if self.df.empty:
             return []
 
