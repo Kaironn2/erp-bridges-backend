@@ -71,11 +71,11 @@ def test_successful_processing(valid_csv_data):
     assert order1.buy_order_date == datetime(2025, 4, 10, 22, 1, 33)
 
     # customer data
-    assert order1.customer.first_name == 'luiza'
-    assert order1.customer.last_name == 'correia'
-    assert order1.customer.email == 'luigi32@viana.br'
-    assert order1.customer.cpf == '09176482340'
-    assert order1.customer.phone == '7163794026'
+    assert order1.first_name == 'luiza'
+    assert order1.last_name == 'correia'
+    assert order1.email == 'luigi32@viana.br'
+    assert order1.cpf == '09176482340'
+    assert order1.phone == '7163794026'
 
     # mapping
     assert order1.payment_type == 'boleto bancário'
@@ -84,7 +84,7 @@ def test_successful_processing(valid_csv_data):
     assert order2.buy_order == '414797776'
     assert order2.status == 'entregue'
     assert order2.payment_type == 'cartão de crédito'
-    assert order2.customer.first_name == 'rodrigo'
+    assert order2.first_name == 'rodrigo'
 
 
 def test_empty_strings_converted_to_none(valid_csv_data):
@@ -99,7 +99,7 @@ def test_empty_strings_converted_to_none(valid_csv_data):
     validated_data = adapter.process()
 
     order3 = validated_data[1]
-    assert order3.customer.phone is None
+    assert order3.phone is None
 
 
 def test_file_not_found_raises_error():

@@ -16,13 +16,3 @@ class BuyOrderReportData(BaseModel):
     shipping_amount: Decimal = Field(alias='Frete')
     discount: Decimal = Field(alias='Desconto')
     total_amount: Decimal = Field(alias='Total da Venda')
-
-    first_name: str = Field(alias='Firstname')
-    last_name: str = Field(alias='Lastname')
-    email: str = Field(alias='Email')
-    customer_group: str = Field(alias='Grupo do Cliente')
-    cpf: str = Field(alias='Número CPF/CNPJ')
-    phone: Optional[str] = Field(alias='Shipping Telephone')
-
-    class Config:
-        populate_by_name = True

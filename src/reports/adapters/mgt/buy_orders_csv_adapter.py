@@ -44,3 +44,7 @@ class MgtBuyOrdersCsvAdapter(BaseReportAdapter[BuyOrderReportData]):
             }
         }
         mapping_contains = True
+        rename_columns = {
+            'Email': 'E-mail',
+            'Grupo do Cliente': 'Grupo',
+        }
