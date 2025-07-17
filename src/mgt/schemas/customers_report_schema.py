@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class CustomerReportData(BaseModel):
-    customer_external_id: str = Field(alias='ID')
+    customer_external_id: Optional[str] = Field(alias='ID')
     first_name: str = Field(alias='Firstname')
     last_name: str = Field(alias='Lastname')
     email: str = Field(alias='E-mail')
