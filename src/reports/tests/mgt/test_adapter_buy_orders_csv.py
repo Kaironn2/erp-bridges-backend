@@ -58,7 +58,7 @@ def test_successful_processing(valid_csv_data):
     assert isinstance(validated_data[0], BuyOrderReportData)
 
     # validated order data
-    assert order1.buy_order == '507943839'
+    assert order1.order_number == '507943839'
     assert order1.status == 'cancelado'
     assert order1.tracking_code == 'TRACK123'
 
@@ -68,7 +68,7 @@ def test_successful_processing(valid_csv_data):
     assert order1.total_amount == Decimal('85.46')
 
     # date conversion
-    assert order1.buy_order_date == datetime(2025, 4, 10, 22, 1, 33)
+    assert order1.order_date == datetime(2025, 4, 10, 22, 1, 33)
 
     # customer data
     assert order1.first_name == 'luiza'
@@ -81,7 +81,7 @@ def test_successful_processing(valid_csv_data):
     assert order1.payment_type == 'boleto bancário'
 
     # second order data
-    assert order2.buy_order == '414797776'
+    assert order2.order_number == '414797776'
     assert order2.status == 'entregue'
     assert order2.payment_type == 'cartão de crédito'
     assert order2.first_name == 'rodrigo'

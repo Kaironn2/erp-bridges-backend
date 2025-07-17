@@ -6,9 +6,9 @@ from pydantic import BaseModel, Field
 
 
 class BuyOrderReportData(BaseModel):
-    buy_order: str = Field(alias='Pedido #')
-    buy_order_external_id: str = Field(alias='ID do Pedido')
-    buy_order_date: datetime = Field(alias='Comprado Em')
+    order_number: str = Field(alias='Pedido #')
+    order_external_id: str = Field(alias='ID do Pedido')
+    order_date: datetime = Field(alias='Comprado Em')
     status: str = Field(alias='Status')
     tracking_code: Optional[str] = Field(alias='Número do Rastreador')
     sold_quantity: int = Field(alias='Qtd. Vendida')
