@@ -15,7 +15,7 @@ class CustomerGroup(models.Model):
 
 
 class Customer(models.Model):
-    external_id = models.IntegerField(unique=True, blank=True, null=True)
+    external_id = models.CharField(unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255, unique=True)
@@ -71,7 +71,7 @@ class Status(models.Model):
 
 
 class BuyOrder(models.Model):
-    order_number = models.IntegerField(unique=True)
+    order_number = models.CharField(unique=True)
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='buy_orders')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
