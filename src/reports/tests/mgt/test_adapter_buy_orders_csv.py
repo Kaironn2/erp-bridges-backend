@@ -21,6 +21,7 @@ def test_successful_processing(buy_orders_valid_csv_data):
 
 
 def test_buy_order_data(validated_buy_orders):
+    """Verifies that the report data has been processed correctly"""
     order = validated_buy_orders[0]
 
     assert order.order_number == '507943839'
@@ -29,6 +30,7 @@ def test_buy_order_data(validated_buy_orders):
 
 
 def test_currency_columns_conversion(validated_buy_orders):
+    """Ensures date strings are correctly converted to Decimal objects."""
     order = validated_buy_orders[0]
 
     assert order.shipping_amount == Decimal('23.24')
@@ -37,12 +39,14 @@ def test_currency_columns_conversion(validated_buy_orders):
 
 
 def test_datetime_columns_conversion(validated_buy_orders):
+    """Ensures date strings are correctly converted to datetime objects."""
     order = validated_buy_orders[0]
 
     assert order.order_date == datetime(2025, 4, 10, 22, 1, 33)
 
 
 def test_customer_data(validated_buy_orders):
+    """Verifies that the report customer data has been processed correctly"""
     order = validated_buy_orders[0]
 
     assert order.first_name == 'luiza'
@@ -53,6 +57,7 @@ def test_customer_data(validated_buy_orders):
 
 
 def test_columns_remapping(validated_buy_orders):
+    """Verifies if column data has been correcly remapped"""
     order = validated_buy_orders[0]
 
     assert order.payment_type == 'boleto bancário'
