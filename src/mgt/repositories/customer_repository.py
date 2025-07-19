@@ -7,7 +7,7 @@ from mgt.models import Customer
 
 class CustomerRepository:
 
-    def find_by_email_or_cpf(self, email: str, cpf: str) -> Optional[Customer]:
+    def find_by_email_or_cpf(self, email: str = None, cpf: str = None) -> Optional[Customer]:
         """
         Finds a single customer by their email OR their CPF using a Q object.
         Returns the customer instance or None if not found.
