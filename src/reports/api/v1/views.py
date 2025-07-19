@@ -23,7 +23,7 @@ class ReportUploadAPIView(APIView):
 
         media_path = settings.MEDIA_ROOT / 'reports'
         fs = FileSystemStorage(location=media_path)
-        file_name = fs.save(uploaded_file.file_name, uploaded_file)
+        file_name = fs.save(uploaded_file.name, uploaded_file)
         file_path = fs.path(file_name)
 
         task = process_report(report_type=report_type, file_path_or_buffer=file_path)
