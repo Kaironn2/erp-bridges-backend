@@ -11,6 +11,7 @@ dependencies = [
     "djangorestframework-simplejwt>=5.5.0",
     "pandas>=2.3.1",
     "pydantic[email]>=2.11.7",
+    "pytest-django>=4.11.1",
     "python-decouple>=3.8",
 ]
 
