@@ -43,12 +43,13 @@ class MgtCustomersReportStrategy(BaseReportStrategy):
 
     def update_or_create_customer(self, validated_customer: CustomerReportData) -> Customer:
         customer = self.customer_repo.find_by_email_or_cpf(validated_customer.email)
+        customer_group = self.get_or_create_customer_group(validated_customer.customer_group)
         customer_data = {
             'external_id': validated_customer.external_id,
             'first_name': validated_customer.first_name,
             'last_name': validated_customer.last_name,
             'email': validated_customer.email,
-            'customer_group': validated_customer.customer_group,
+            'customer_group': customer_group,
             'phone': validated_customer.phone,
             'cep': validated_customer.cep,
             'state': validated_customer.state,
