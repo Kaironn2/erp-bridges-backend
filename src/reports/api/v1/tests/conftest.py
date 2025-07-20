@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 from rest_framework.test import APIClient
 
@@ -19,3 +21,20 @@ def customers_valid_csv_byte_string() -> str:
     )
 
     return csv_string.encode('utf-8')
+
+
+@pytest.fixture
+def mock_file_storage():
+    """
+    Mocks Django FileSystemStorage to prevent file creation during tests.
+    This fixture patches the FileSystemStorage class for the duration of a test.
+    """
+
+    with patch('django.core.files.storage.FileSystemStorage') as mock_storage:
+        mock_instance = MagicMock()
+        mock_instance.save.return_value = 'fake_report_name.csv'
+        mock_instance.path.side_effect = lambda name: f'/tmp/{name}'
+
+        mock_storage.return_value = mock_instance
+
+        yield mock_storage
