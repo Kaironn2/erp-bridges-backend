@@ -7,17 +7,19 @@ requires-python = ">=3.13"
 dependencies = [
     "celery>=5.5.3",
     "django>=5.2.4",
+    "django-celery-results>=2.6.0",
     "djangorestframework>=3.16.0",
     "djangorestframework-simplejwt>=5.5.0",
+    "flower>=2.0.1",
     "pandas>=2.3.1",
     "pydantic[email]>=2.11.7",
-    "pytest-django>=4.11.1",
     "python-decouple>=3.8",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
+    "pytest-django>=4.11.1",
     "ruff>=0.12.3",
     "taskipy>=1.14.1",
 ]
@@ -38,7 +40,7 @@ quote-style = 'single'
 [tool.pytest.ini_options]
 pythonpath = './src'
 addopts = '-p no:warnings'
-DJANGO_SETTINGS_MODULE = 'core.settings'
+DJANGO_SETTINGS_MODULE = 'core.settings_test'
 
 [tool.taskipy.tasks]
 lint = 'ruff check'
