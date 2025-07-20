@@ -11,7 +11,7 @@ class CustomerReportData(BaseModel):
     email: str = Field(alias='E-mail')
     customer_group: str = Field(alias='Grupo')
     phone: Optional[str] = Field(alias='Telefone')
-    cep: Optional[str] = Field(alias='CEP')
+    postal_code: Optional[str] = Field(alias='CEP')
     state: Optional[str] = Field(alias='Estado')
     country: Optional[str] = Field(alias='País')
     customer_since: Optional[datetime] = Field(alias='Cliente Desde')
