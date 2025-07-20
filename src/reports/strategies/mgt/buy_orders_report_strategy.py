@@ -8,7 +8,7 @@ from mgt.repositories.customer_repository import CustomerRepository
 from mgt.repositories.payment_type_repository import PaymentTypeRepository
 from mgt.repositories.status_repository import StatusRepository
 from mgt.schemas.buy_orders_report_schema import BuyOrderReportData
-from reports.adapters.mgt.customers_csv_adapter import MgtCustomersCsvAdapter
+from reports.adapters.mgt.buy_orders_csv_adapter import MgtBuyOrdersCsvAdapter
 from reports.strategies.base_strategy import BaseReportStrategy
 
 
@@ -71,5 +71,5 @@ class MgtBuyOrdersReportStrategy(BaseReportStrategy):
 
     @property
     def validated_orders(self) -> List[BuyOrderReportData]:
-        adapter = MgtCustomersCsvAdapter(self.file)
+        adapter = MgtBuyOrdersCsvAdapter(self.file)
         return adapter.process()
