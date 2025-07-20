@@ -103,6 +103,7 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         self.df = dfu.replace_values(self.df, self.replace_mapping, self.replace_contains)
         self.df = dfu.empty_strings_to_none(self.df)
         self.df = self.df.rename(self.rename_columns)
+        self.df = self.df.astype(object).where(pd.notna(self.df), None)
 
         return self.df
 
