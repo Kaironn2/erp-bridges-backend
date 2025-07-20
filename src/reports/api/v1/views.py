@@ -5,7 +5,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from reports.services import process_report
+from reports.tasks import process_report_task
 
 from .serializers import ReportUploadSerializer
 
@@ -26,7 +26,7 @@ class ReportUploadAPIView(APIView):
         file_name = fs.save(uploaded_file.name, uploaded_file)
         file_path = fs.path(file_name)
 
-        task = process_report(report_type=report_type, file_path_or_buffer=file_path)
+        task = process_report_task.delay(report_type=report_type, file_path=file_path)
 
         response_data = {
             'message': 'Report accepted for processing.',
