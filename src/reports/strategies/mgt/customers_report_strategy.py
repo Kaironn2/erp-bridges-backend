@@ -51,7 +51,7 @@ class MgtCustomersReportStrategy(BaseReportStrategy):
             'email': validated_customer.email,
             'customer_group': customer_group,
             'phone': validated_customer.phone,
-            'cep': validated_customer.cep,
+            'postal_code': validated_customer.postal_code,
             'state': validated_customer.state,
             'country': validated_customer.country,
             'customer_since': validated_customer.customer_since,

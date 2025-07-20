@@ -54,7 +54,7 @@ def test_empty_optional_fields_is_none(validated_customers):
     customer = validated_customers[0]
 
     assert customer.phone is None
-    assert customer.cep is None
+    assert customer.postal_code is None
     assert customer.state is None
     assert customer.country is None
 
