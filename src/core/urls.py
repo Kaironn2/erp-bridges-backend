@@ -1,11 +1,12 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path, re_path
+from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'^api/(?P<version>(v1))/', include('reports.api.urls')),
+    path('api/', include('reports.api.urls')),
+    path('api/', include('mgt.api.urls'))
 ]
 
 if settings.DEBUG:
