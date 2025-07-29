@@ -98,6 +98,7 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
         self.df = dfu.split_column(self.df, self.split_columns, self.split_separator)
         self.df = dfu.clean_currency_columns(self.df, self.currency_columns)
         self.df = dfu.convert_to_datetime(self.df, self.datetime_columns, self.date_format)
+        self.df = dfu.convert_dataframe_datetimes_to_aware(self.df, self.datetime_columns)
         self.df = dfu.keep_only_digits(self.df, self.keep_only_digits_columns)
         self.df = dfu.lower_case_values(self.df, self.lower_case_columns)
         self.df = dfu.replace_values(self.df, self.replace_mapping, self.replace_contains)

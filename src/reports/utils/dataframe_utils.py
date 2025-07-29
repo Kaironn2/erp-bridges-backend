@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
+from reports.utils.datetime_utils import local_to_aware
 from reports.utils.monetary import to_decimal
 
 
@@ -182,5 +183,19 @@ class DataFrameUtils:
             split_df = df[col].str.split(sep, n=1, expand=True)
             df[mapping[0]] = split_df[0]
             df[mapping[1]] = split_df[1]
+
+        return df
+
+    @staticmethod
+    def convert_dataframe_datetimes_to_aware(
+        df: pd.DataFrame, datetime_columns: list
+    ) -> pd.DataFrame:
+        """
+        Converts data columns in DataFrame to time zone awareness (America/Sao_Paulo).
+        """
+        for col in datetime_columns:
+            if col in df.columns:
+                df[col] = pd.to_datetime(df[col], errors='coerce')
+                df[col] = df[col].apply(local_to_aware)
 
         return df
