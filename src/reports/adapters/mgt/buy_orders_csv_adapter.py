@@ -15,12 +15,26 @@ class MgtBuyOrdersCsvAdapter(BaseReportAdapter[BuyOrderReportData]):
 
     def load_raw_data_to_df(self, file_path_or_buffer):
         try:
-            df = pd.read_csv(file_path_or_buffer, sep=';', dtype=str)
-            return df.fillna('')
+            df = pd.read_csv(file_path_or_buffer, sep=',', dtype=str, encoding='utf-8')
+            df = df.fillna('')
+            return self.remove_totais_row(df=df)
         except FileNotFoundError:
             raise ValueError(f'File not found in the path: {file_path_or_buffer}')
         except Exception as e:
             raise ValueError(f'Error on read csv file: {e}')
+
+    def remove_totais_row(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Remove last row if "Pedido #" column == "Totais"
+        """
+        verify_column = 'Pedido #'
+        value = 'Totais'
+        if not df.empty and verify_column in df.columns:
+            last_row = df.iloc[-1]
+            if str(last_row[verify_column]).strip().lower() == value.lower():
+                df = df.iloc[:-1]
+
+        return df
 
     class Meta:
         currency_columns = ['Frete', 'Desconto', 'Total da Venda']
