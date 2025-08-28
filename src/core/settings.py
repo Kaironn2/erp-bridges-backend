@@ -137,7 +137,7 @@ REST_FRAMEWORK = {
     'VERSION_PARAM': 'version',
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication'
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
 
