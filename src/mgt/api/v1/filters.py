@@ -15,10 +15,13 @@ class CustomerFilter(filters.FilterSet):
     last_order_max = filters.NumberFilter(field_name='last_order', lookup_expr='lte')
 
     name = filters.CharFilter(method='filter_by_full_name', label='Search by name')
+    email = filters.CharFilter(lookup_expr='icontains')
+    cpf = filters.CharFilter(lookup_expr='icontains')
+    phone = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Customer
-        fields = ['email', 'cpf', 'customer_group', 'phone', 'state', 'country', 'postal_code']
+        fields = ['customer_group', 'state', 'country', 'postal_code']
 
     def filter_by_full_name(
         self, queryset: QuerySet[Customer], name: str, value: str
