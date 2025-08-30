@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import serializers
 
 from mgt.models import BuyOrder, BuyOrderDetail, Customer, CustomerGroup, PaymentType, Status
@@ -34,6 +36,18 @@ class CustomerSerializer(serializers.ModelSerializer):
             'total_orders',
             'total_spent',
         ]
+
+    def validate_cpf(self, value: str):
+        """Remove non-digit characters from the CPF field"""
+        if value:
+            return re.sub(r'\D', '', value)
+        return value
+
+    def validate_phone(self, value: str):
+        """Remove non-digit characters from the phone field"""
+        if value:
+            return re.sub(r'\D', '', value)
+        return value
 
 
 class PaymentTypeSerializer(serializers.ModelSerializer):
