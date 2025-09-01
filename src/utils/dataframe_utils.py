@@ -2,8 +2,8 @@ from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
-from reports.utils.datetime_utils import local_to_aware
-from reports.utils.monetary import to_decimal
+from utils.datetime_utils import local_to_aware
+from utils.monetary import to_decimal
 
 
 class DataFrameUtils:
