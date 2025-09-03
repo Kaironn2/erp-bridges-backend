@@ -1,13 +1,25 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional, TypedDict
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from mgt.models import Customer
 
 
-class CustomerRepository:
+class GetByEmailOrCpfType(TypedDict):
+    email: str
+    cpf: str
 
-    def find_by_email_or_cpf(self, email: str = None, cpf: str = None) -> Optional[Customer]:
+
+class CustomerRepository:
+    def find_all(self) -> QuerySet[Customer]:
+        return Customer.objects.all()
+
+    def build(self, **data) -> Customer:
+        return Customer(**data)
+
+    def find_by_email_or_cpf(
+        self, email: Optional[str] = None, cpf: Optional[str] = None
+    ) -> Optional[Customer]:
         """
         Finds a single customer by their email OR their CPF using a Q object.
         Returns the customer instance or None if not found.
@@ -31,3 +43,20 @@ class CustomerRepository:
             setattr(customer, attr, value)
         customer.save()
         return customer
+
+    def bulk_upsert(self, customers: List[Customer]) -> None:
+        Customer.objects.bulk_create(
+            customers,
+            batch_size=5000,
+            update_conflicts=True,
+            update_fields=[
+                'cpf',
+                'email',
+                'first_name',
+                'last_name',
+                'phone',
+                'last_order',
+                'customer_group_id',
+            ],
+            unique_fields=['cpf']
+        )
