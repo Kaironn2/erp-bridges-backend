@@ -4,7 +4,7 @@ from typing import Dict, Generic, List, Type, TypeVar
 import pandas as pd
 from pydantic import BaseModel, ValidationError
 
-from reports.utils.dataframe_utils import DataFrameUtils as dfu
+from utils.dataframe_utils import DataFrameUtils as dfu
 
 SchemaType = TypeVar('SchemaType', bound=BaseModel)
 
@@ -29,11 +29,13 @@ class BaseReportAdapter(ABC, Generic[SchemaType]):
             def load_raw_data_to_df(self, file_path):
                 return pd.read_csv(file_path)
     """
+
     class Meta:
         """
         Inner class for declarative configuration of the cleaning pipeline.
         Subclasses should override these attributes as needed.
         """
+
         currency_columns: List[str] = []
         datetime_columns: List[str] = []
         date_format: str = ''

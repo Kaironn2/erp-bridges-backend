@@ -41,7 +41,7 @@ class DataFrameUtils:
                 .str.replace('.', '', regex=False)
                 .str.replace(',', '.', regex=False)
             )
-            df[col] = cleaned_series.apply(to_decimal)
+            df[col] = cleaned_series.map(to_decimal)
 
         return df
 
@@ -199,3 +199,16 @@ class DataFrameUtils:
                 df[col] = df[col].apply(local_to_aware)
 
         return df
+
+    @staticmethod
+    def replace_nulls_with_none(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Replaces pandas null-like values (pd.NA, NaT, NaN) with Python None
+
+        Args:
+            df (pd.DataFrame): input dataframe.
+
+        Returns:
+            pd.DataFrame: DataFrame with null values converted into None.
+        """
+        return df.replace({pd.NA: None, pd.NaT: None, float('nan'): None})

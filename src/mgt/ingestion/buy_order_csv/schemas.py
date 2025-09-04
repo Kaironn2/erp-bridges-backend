@@ -1,0 +1,18 @@
+COLUMN_ALIASES = {
+    'Pedido #': 'order_number',
+    'ID do Pedido': 'order_external_id',
+    'Comprado Em': 'order_date',
+    'Status': 'status',
+    'Número do Rastreador': 'tracking_code',
+    'Qtd. Vendida': 'sold_quantity',
+    'Payment Type': 'payment_type',
+    'Frete': 'shipping_amount',
+    'Desconto': 'discount_amount',
+    'Total da Venda': 'total_amount',
+    'Firstname': 'first_name',
+    'Lastname': 'last_name',
+    'Email': 'email',
+    'Grupo do Cliente': 'customer_group',
+    'Número CPF/CNPJ': 'cpf',
+    'Shipping Telephone': 'phone',
+}
