@@ -21,7 +21,7 @@ class BuyOrderCsvTransformer(BaseTransformer):
         return dfu.lower_case_values(df, columns)
 
     def _clean_currency_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        columns = ['shipping_amount', 'discount', 'total_amount']
+        columns = ['shipping_amount', 'discount_amount', 'total_amount']
         return dfu.clean_currency_columns(df, columns, symbol='R$')
 
     def _convert_date_columns(self, df: pd.DataFrame) -> pd.DataFrame:

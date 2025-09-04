@@ -7,7 +7,7 @@ COLUMN_ALIASES = {
     'Qtd. Vendida': 'sold_quantity',
     'Payment Type': 'payment_type',
     'Frete': 'shipping_amount',
-    'Desconto': 'discount',
+    'Desconto': 'discount_amount',
     'Total da Venda': 'total_amount',
     'Firstname': 'first_name',
     'Lastname': 'last_name',
