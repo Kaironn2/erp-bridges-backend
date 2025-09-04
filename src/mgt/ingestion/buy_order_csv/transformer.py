@@ -13,11 +13,12 @@ class BuyOrderCsvTransformer(BaseTransformer):
         self.df = self._clean_currency_columns(self.df)
         self.df = self._convert_date_columns(self.df)
         self.df = self._keep_only_digits_columns(self.df)
+        self.df = self._replace_columns_values(self.df)
         self.df = dfu.replace_nulls_with_none(self.df)
         return self.df
 
     def _lower_case_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        columns = ['first_name', 'last_name', 'email', 'customer_group', 'status']
+        columns = ['first_name', 'last_name', 'email', 'customer_group', 'status', 'payment_type']
         return dfu.lower_case_values(df, columns)
 
     def _clean_currency_columns(self, df: pd.DataFrame) -> pd.DataFrame:
