@@ -1,13 +1,30 @@
+from datetime import datetime
 from typing import Dict, List, Optional, TypedDict
 
 from django.db.models import Q, QuerySet
 
-from mgt.models import Customer
+from mgt.models import Customer, CustomerGroup
 
 
 class GetByEmailOrCpfType(TypedDict):
     email: str
     cpf: str
+
+
+class CustomerDataType(TypedDict, total=False):
+    external_id: Optional[str]
+    first_name: str
+    last_name: str
+    email: str
+    cpf: Optional[str]
+    phone: Optional[str]
+    customer_group: CustomerGroup
+    customer_since: Optional[datetime]
+    postal_code: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    country: Optional[str]
+    last_order: Optional[datetime]
 
 
 class CustomerRepository:
@@ -35,13 +52,23 @@ class CustomerRepository:
 
         return Customer.objects.filter(query).first()
 
-    def create(self, customer_data: Dict) -> Customer:
+    def create(self, customer_data: CustomerDataType) -> Customer:
         return Customer.objects.create(**customer_data)
 
     def update(self, customer: Customer, customer_data: Dict) -> Customer:
         for attr, value in customer_data.items():
             setattr(customer, attr, value)
         customer.save()
+        return customer
+
+    def upsert(self, customer_data: CustomerDataType) -> Customer:
+        """
+        Updates an existing customer or creates a new one based on the email.
+        """
+        email = customer_data.pop('email')
+        customer, created = Customer.objects.update_or_create(
+            email=email, defaults=dict(customer_data)
+        )
         return customer
 
     def bulk_upsert(self, customers: List[Customer]) -> None:
@@ -58,5 +85,5 @@ class CustomerRepository:
                 'last_order',
                 'customer_group_id',
             ],
-            unique_fields=['cpf']
+            unique_fields=['cpf'],
         )

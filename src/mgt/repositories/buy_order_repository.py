@@ -1,8 +1,13 @@
-from typing import List, Optional
+from typing import List, Optional, TypedDict
 
 from django.db.models.query import QuerySet
 
 from mgt.models import BuyOrder, Customer
+
+
+class BuyOrderData(TypedDict):
+    order_number: str
+    customer: Customer
 
 
 class BuyOrderRepository:
@@ -15,9 +20,10 @@ class BuyOrderRepository:
     def build(self, **data) -> BuyOrder:
         return BuyOrder(**data)
 
-    def get_or_create(self, order_number: str, customer: Customer) -> BuyOrder:
+    def get_or_create(self, buy_order_data: BuyOrderData) -> BuyOrder:
+        order_number = buy_order_data.pop('order_number')
         buy_order, created = BuyOrder.objects.get_or_create(
-            order_number=order_number, defaults={'customer': customer}
+            order_number=order_number, defaults=dict(buy_order_data)
         )
         return buy_order
 
