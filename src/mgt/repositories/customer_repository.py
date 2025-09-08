@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional, TypedDict
+from typing import Optional, TypedDict
 
 from django.db.models import Q, QuerySet
 
@@ -12,6 +12,7 @@ class GetByEmailOrCpfType(TypedDict):
 
 
 class CustomerDataType(TypedDict, total=False):
+    id: Optional[str]
     external_id: Optional[str]
     first_name: str
     last_name: str
@@ -31,7 +32,7 @@ class CustomerRepository:
     def find_all(self) -> QuerySet[Customer]:
         return Customer.objects.all()
 
-    def build(self, **data) -> Customer:
+    def build(self, data: CustomerDataType) -> Customer:
         return Customer(**data)
 
     def find_by_email_or_cpf(
@@ -55,7 +56,7 @@ class CustomerRepository:
     def create(self, customer_data: CustomerDataType) -> Customer:
         return Customer.objects.create(**customer_data)
 
-    def update(self, customer: Customer, customer_data: Dict) -> Customer:
+    def update(self, customer: Customer, customer_data: CustomerDataType) -> Customer:
         for attr, value in customer_data.items():
             setattr(customer, attr, value)
         customer.save()
@@ -71,7 +72,7 @@ class CustomerRepository:
         )
         return customer
 
-    def bulk_upsert(self, customers: List[Customer]) -> None:
+    def bulk_upsert(self, customers: list[Customer]) -> None:
         Customer.objects.bulk_create(
             customers,
             batch_size=5000,
@@ -83,7 +84,7 @@ class CustomerRepository:
                 'last_name',
                 'phone',
                 'last_order',
-                'customer_group_id',
+                'customer_group',
             ],
-            unique_fields=['cpf'],
+            unique_fields=['email'],
         )
