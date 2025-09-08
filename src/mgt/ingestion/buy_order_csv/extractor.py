@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pandas as pd
 
 from core.ingestion.base_extractor import BaseExtractor
@@ -11,13 +9,11 @@ from .schemas import COLUMN_ALIASES
 class BuyOrderCsvExtractor(BaseExtractor):
     def __init__(self, csv_file: CsvSource) -> None:
         self.csv_file: CsvSource = csv_file
-        self.df: Optional[pd.DataFrame] = None
 
     def extract(self) -> pd.DataFrame:
         df = self._load_csv()
         df = df.rename(columns=COLUMN_ALIASES)
         df = self._remove_totals_row(df)
-        self.df = df
         return df
 
     def _load_csv(self) -> pd.DataFrame:

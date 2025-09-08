@@ -23,9 +23,6 @@ class BuyOrderCsvLoader(BaseLoader):
         self.customer_group_repo = CustomerGroupRepository()
         self.payment_type_repo = PaymentTypeRepository()
         self.status_repo = StatusRepository()
-        self.customers = []
-        self.buy_orders = []
-        self.buy_orders_details = []
 
     def load(self) -> None:
         with transaction.atomic():
@@ -48,8 +45,11 @@ class BuyOrderCsvLoader(BaseLoader):
             'customer_group': customer_group,
         }
 
-        if not customer or not customer.last_order or customer.last_order < row['order_date']:
-            return self.customer_repo.upsert(customer_data)
+        if not customer:
+            return self.customer_repo.create(customer_data)
+
+        if not customer.last_order or customer.last_order < row['order_date']:
+            return self.customer_repo.update(customer, customer_data)
 
         return customer
 
