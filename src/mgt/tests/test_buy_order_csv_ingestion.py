@@ -23,7 +23,7 @@ def test_extract(mgt_fixtures_path):
     extractor = BuyOrderCsvExtractor(csv_file=csv_path)
     df = extractor.extract()
 
-    rows_len = 1000
+    rows_len = 10000
 
     assert len(df) == rows_len
     assert set(df.columns) == set(COLUMN_ALIASES.values())
@@ -71,6 +71,7 @@ def test_load_data(buy_orders_dataframe):
     loader.load()
 
     total_buy_orders = 9943
-    # assert Customer.objects.count() == 992
+    total_customers = 6064
+    assert Customer.objects.count() == total_customers
     assert BuyOrder.objects.count() == total_buy_orders
     assert BuyOrderDetail.objects.count() == total_buy_orders
