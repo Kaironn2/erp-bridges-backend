@@ -1,5 +1,6 @@
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Optional, TypedDict
+from typing import Optional, Literal, TypedDict
 
 from django.db.models import Q, QuerySet
 
@@ -26,6 +27,9 @@ class CustomerDataType(TypedDict, total=False):
     state: Optional[str]
     country: Optional[str]
     last_order: Optional[datetime]
+
+
+CustomerUpdateFields = Literal['external_id', 'customer_since', 'last_order', 'customer_group']
 
 
 class CustomerRepository:
@@ -71,6 +75,14 @@ class CustomerRepository:
             email=email, defaults=dict(customer_data)
         )
         return customer
+
+    def bulk_create(self, customers: list[Customer], ignore_conflicts: bool) -> list[Customer]:
+        return Customer.objects.bulk_create(customers, ignore_conflicts=True)
+
+    def bulk_update(
+        self, customers: list[Customer], fields: Sequence[CustomerUpdateFields]
+    ) -> None:
+        Customer.objects.bulk_update(customers, fields)
 
     def bulk_upsert(self, customers: list[Customer]) -> None:
         Customer.objects.bulk_create(

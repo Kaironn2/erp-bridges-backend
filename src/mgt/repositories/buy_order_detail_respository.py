@@ -1,6 +1,7 @@
+from collections.abc import Sequence
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from mgt.models import BuyOrder, BuyOrderDetail, PaymentType, Status
 
@@ -18,6 +19,9 @@ class BuyOrderDetailData(TypedDict):
     total_amount: Decimal
 
 
+BuyOrderDetailUpdateFields = Literal['status', 'tracking_code']
+
+
 class BuyOrderDetailRepository:
     def build(self, **data) -> BuyOrderDetail:
         return BuyOrderDetail(**data)
@@ -30,14 +34,17 @@ class BuyOrderDetailRepository:
         )
         return buy_order_detail
 
-    def bulk_upsert(self, details: List[BuyOrderDetail]) -> None:
-        BuyOrderDetail.objects.bulk_create(
-            details,
-            batch_size=5000,
-            update_conflicts=True,
-            update_fields=[
-                'status',
-                'tracking_code',
-            ],
-            unique_fields=['order_external_id'],
+    def bulk_create(
+        self, orders_details: list[BuyOrderDetail], ignore_conflicts: bool
+    ) -> list[BuyOrderDetail]:
+        return BuyOrderDetail.objects.bulk_create(
+            orders_details, ignore_conflicts=ignore_conflicts
         )
+
+    def bulk_update(
+        self, orders_details: list[BuyOrderDetail], fields: Sequence[BuyOrderDetailUpdateFields]
+    ) -> None:
+        BuyOrderDetail.objects.bulk_update(orders_details, fields)
+
+    def find_by_external_ids(self, external_ids: list[str]) -> list[BuyOrderDetail]:
+        return list(BuyOrderDetail.objects.filter(order_external_id__in=external_ids))

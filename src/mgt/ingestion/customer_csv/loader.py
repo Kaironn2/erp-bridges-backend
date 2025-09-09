@@ -13,25 +13,52 @@ class CustomerCsvLoader(BaseLoader):
         self.df = df
         self.customer_repo = CustomerRepository()
         self.customer_group_repo = CustomerGroupRepository()
+        self.customers_by_email = {}
+        self.customer_groups = {}
 
     def load(self) -> None:
         with transaction.atomic():
+            self._preload_customers()
+            self._preload_customer_groups()
+
+            new_customers = []
+            updated_customers = []
+
             for _, row in self.df.iterrows():
-                self._upsert_customer(row)
+                customer = self.customers_by_email.get(row['email'])
 
-    def _upsert_customer(self, row: pd.Series) -> None:
-        customer = self.customer_repo.find_by_email_or_cpf(email=row['email'])
+                if customer:
+                    self._update_customer(customer, row)
+                    updated_customers.append(customer)
+                else:
+                    new_customer = self._build_customer(row)
+                    new_customers.append(new_customer)
 
-        if customer:
-            self._update_customer(customer, row)
-            return
+            self.customer_repo.bulk_create(new_customers, ignore_conflicts=True)
 
-        self._create_customer(row)
+            self.customer_repo.bulk_update(updated_customers, ['customer_since', 'external_id'])
 
-    def _create_customer(self, row: pd.Series) -> None:
-        customer_group = self.customer_group_repo.get_or_create(row['customer_group'])
+    def _preload_customers(self):
+        emails = self.df['email'].unique().tolist()
+        self.customers_by_email = {
+            c.email: c
+            for c in Customer.objects.filter(email__in=emails).only(
+                'id', 'email', 'external_id', 'customer_since'
+            )
+        }
 
-        customer_data: CustomerDataType = {
+    def _preload_customer_groups(self):
+        names = self.df['customer_group'].unique().tolist()
+        groups = self.customer_group_repo.filter_by_names(names)
+        self.customer_groups = {g.name: g for g in groups}
+
+    def _build_customer(self, row: pd.Series) -> Customer:
+        customer_group = self.customer_groups.get(row['customer_group'])
+        if not customer_group:
+            customer_group = self.customer_group_repo.get_or_create(row['customer_group'])
+            self.customer_groups[customer_group.name] = customer_group
+
+        customer: CustomerDataType = {
             'first_name': row['first_name'],
             'last_name': row['last_name'],
             'email': row['email'],
@@ -42,11 +69,9 @@ class CustomerCsvLoader(BaseLoader):
             'customer_group': customer_group,
             'external_id': row['external_id'],
         }
-        self.customer_repo.create(customer_data)
+
+        return self.customer_repo.build(customer)
 
     def _update_customer(self, customer: Customer, row: pd.Series) -> None:
-        customer_data: CustomerDataType = {
-            'external_id': row['external_id'],
-            'customer_since': row['customer_since'],
-        }
-        self.customer_repo.update(customer, customer_data)
+        customer.external_id = row['external_id']
+        customer.customer_since = row['customer_since']
