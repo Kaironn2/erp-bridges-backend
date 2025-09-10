@@ -7,15 +7,15 @@ from pandas import DataFrame
 class BasePipeline(ABC):
     @final
     def run(self, source: Any):
-        df = self.extract(source)
-        df = self.transform(df)
-        self.load(df)
+        df = self._extract(source)
+        df = self._transform(df)
+        self._load(df)
 
     @abstractmethod
-    def extract(self, source: Any) -> DataFrame: ...
+    def _extract(self, source: Any) -> DataFrame: ...
 
     @abstractmethod
-    def transform(self, df: DataFrame) -> DataFrame: ...
+    def _transform(self, df: DataFrame) -> DataFrame: ...
 
     @abstractmethod
-    def load(self, df: DataFrame) -> None: ...
+    def _load(self, df: DataFrame) -> None: ...
