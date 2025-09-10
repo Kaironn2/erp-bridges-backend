@@ -1,36 +1,53 @@
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
-from rest_framework import status
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.views import APIView
+import os
+import tempfile
+import logging
+from typing import cast
 
+from celery import Task
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework import status
+
+from reports.api.v1.serializers import (
+    ReportUploadSerializer,
+)
 from reports.tasks import process_report_task
 
-from .serializers import ReportUploadSerializer
+logger = logging.getLogger(__name__)
 
 
-class ReportUploadAPIView(APIView):
-    def post(self, request: Request, *args, **kwargs):
-        """Handles the POST request for file upload"""
+class ReportUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
         serializer = ReportUploadSerializer(data=request.data)
-
         serializer.is_valid(raise_exception=True)
+        validated_data = cast(dict, serializer.validated_data)
 
-        validated_data = serializer.validated_data
         report_type = validated_data['report_type']
         uploaded_file = validated_data['report_file']
 
-        media_path = settings.MEDIA_ROOT / 'reports'
-        fs = FileSystemStorage(location=media_path)
-        file_name = fs.save(uploaded_file.name, uploaded_file)
-        file_path = fs.path(file_name)
+        suffix = os.path.splitext(getattr(uploaded_file, 'name', ''))[1]
+        tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                for chunk in uploaded_file.chunks():
+                    tmp.write(chunk)
+                tmp_path = tmp.name
 
-        task = process_report_task.delay(report_type=report_type, file_path=file_path)
+            task = cast(Task, process_report_task)
+            task.delay(report_type, tmp_path)
 
-        response_data = {
-            'message': 'Report accepted for processing.',
-            'report_type': report_type,
-            'task_id': task.id
-        }
-        return Response(response_data, status=status.HTTP_202_ACCEPTED)
+            return Response(
+                {'detail': 'Report processing started.', 'report_type': report_type},
+                status=status.HTTP_202_ACCEPTED,
+            )
+        except Exception as exc:
+            logger.exception('Failed to start report ingestion for report_type=%s', report_type)
+            if tmp_path and os.path.exists(tmp_path):
+                os.remove(tmp_path)
+            return Response(
+                {'detail': 'Failed to start report ingestion.', 'error': str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

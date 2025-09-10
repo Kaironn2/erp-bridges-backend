@@ -1,9 +1,7 @@
 from django.urls import path
 
-from .views import ReportUploadAPIView
+from .views import ReportUploadView
 
 app_name = 'v1'
 
-urlpatterns = [
-    path('upload/', ReportUploadAPIView.as_view(), name='api-upload-report')
-]
+urlpatterns = [path('upload/', ReportUploadView.as_view(), name='api-upload-report')]
