@@ -5,8 +5,10 @@ import pytest
 from pandas.api.types import is_datetime64_any_dtype
 
 from mgt.ingestion.buy_order_csv.extractor import BuyOrderCsvExtractor
+from mgt.ingestion.buy_order_csv.loader import BuyOrderCsvLoader
 from mgt.ingestion.buy_order_csv.schemas import COLUMN_ALIASES
 from mgt.ingestion.buy_order_csv.transformer import BuyOrderCsvTransformer
+from mgt.models import BuyOrder, BuyOrderDetail, Customer
 
 
 @pytest.fixture
@@ -21,11 +23,11 @@ def test_extract(mgt_fixtures_path):
     extractor = BuyOrderCsvExtractor(csv_file=csv_path)
     df = extractor.extract()
 
-    rows_len = 1000
+    rows_len = 10000
 
     assert len(df) == rows_len
     assert set(df.columns) == set(COLUMN_ALIASES.values())
-    assert df.iloc[0]['first_name'] == 'Giovanna'
+    assert df.iloc[0]['first_name'] == 'Emanuella'
     assert 'totais' not in df['order_number'].str.lower().unique()
 
 
@@ -59,3 +61,17 @@ def test_transform(buy_orders_dataframe):
     expected_payment_types = {'pix', 'cartão de crédito', 'boleto bancário', 'saldo', None}
     actual_payment_types = set(df['payment_type'].unique())
     assert actual_payment_types.issubset(expected_payment_types)
+
+
+@pytest.mark.django_db
+def test_load_data(buy_orders_dataframe):
+    transformer = BuyOrderCsvTransformer(buy_orders_dataframe)
+    df = transformer.transform()
+    loader = BuyOrderCsvLoader(df)
+    loader.load()
+
+    total_buy_orders = 9943
+    total_customers = 6064
+    assert Customer.objects.count() == total_customers
+    assert BuyOrder.objects.count() == total_buy_orders
+    assert BuyOrderDetail.objects.count() == total_buy_orders

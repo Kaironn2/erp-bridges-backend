@@ -10,3 +10,6 @@ class CustomerGroupRepository:
 
     def find_all_as_dict(self) -> Dict[str, CustomerGroup]:
         return {g.name: g for g in CustomerGroup.objects.all()}
+
+    def filter_by_names(self, names: list[str]) -> list[CustomerGroup]:
+        return list(CustomerGroup.objects.filter(name__in=names))

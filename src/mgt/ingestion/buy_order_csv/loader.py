@@ -1,10 +1,9 @@
-from typing import Any
-
 import pandas as pd
 from django.db import transaction
 
 from core.ingestion.base_loader import BaseLoader
-from mgt.repositories.buy_order_repository import BuyOrderRepository
+from mgt.models import BuyOrder, BuyOrderDetail, Customer
+from mgt.repositories.buy_order_repository import BuyOrderDataType, BuyOrderRepository
 from mgt.repositories.buy_order_detail_respository import BuyOrderDetailRepository
 from mgt.repositories.customer_repository import CustomerRepository
 from mgt.repositories.customer_group_repository import CustomerGroupRepository
@@ -21,87 +20,123 @@ class BuyOrderCsvLoader(BaseLoader):
         self.customer_group_repo = CustomerGroupRepository()
         self.payment_type_repo = PaymentTypeRepository()
         self.status_repo = StatusRepository()
-        self.customers = []
-        self.buy_orders = []
-        self.buy_orders_details = []
 
     def load(self) -> None:
         with transaction.atomic():
-            self._cached_data()
-            self._build_data()
-            self._upsert_data()
+            self._process_customers()
+            self._process_buy_orders()
+            self._process_buy_order_details()
 
-    def _upsert_data(self) -> None:
-        self.customer_repo.bulk_upsert(self.customers)
-        self.buy_order_repo.bulk_create(self.buy_orders, ignore_conflicts=True)
-        self.buy_order_detail_repo.bulk_upsert(self.buy_orders_details)
+    def _process_customers(self) -> None:
+        emails = self.df['email'].unique().tolist()
+        cpfs = self.df['cpf'].dropna().unique().tolist()
 
-    def _build_data(self) -> None:
+        existing_customers = Customer.objects.filter(email__in=emails) | Customer.objects.filter(
+            cpf__in=cpfs
+        )
+        customers_by_email = {c.email: c for c in existing_customers}
+        customers_by_cpf = {c.cpf: c for c in existing_customers if c.cpf}
+
+        groups = self.customer_group_repo.filter_by_names(
+            self.df['customer_group'].unique().tolist()
+        )
+        groups_by_name = {g.name: g for g in groups}
+
+        new_customers, update_customers = [], []
+
         for _, row in self.df.iterrows():
-            self._build_customers(row)
-            self._build_buy_orders(row)
-            self._build_buy_orders_details(row)
+            group = groups_by_name.get(
+                row['customer_group']
+            ) or self.customer_group_repo.get_or_create(row['customer_group'])
 
-    def _build_customers(self, row: pd.Series[Any]) -> None:
-        customer_group = self.customer_group_repo.get_or_create(row['customer_group'])
+            customer = customers_by_email.get(row['email']) or customers_by_cpf.get(row['cpf'])
+            if not customer:
+                new_customers.append(
+                    self.customer_repo.build({
+                        'first_name': row['first_name'],
+                        'last_name': row['last_name'],
+                        'email': row['email'],
+                        'cpf': row['cpf'],
+                        'phone': row['phone'],
+                        'last_order': row['order_date'],
+                        'customer_group': group,
+                    })
+                )
+            elif not customer.last_order or customer.last_order < row['order_date']:
+                customer.last_order = row['order_date']
+                customer.customer_group = group
+                update_customers.append(customer)
 
-        customer = self.customer_by_email.get(row['email']) or self.customers_by_cpf.get(
-            row['cpf']
+        if new_customers:
+            self.customer_repo.bulk_create(new_customers, ignore_conflicts=True)
+        if update_customers:
+            self.customer_repo.bulk_update(update_customers, ['last_order', 'customer_group'])
+
+    def _process_buy_orders(self) -> None:
+        customers = self.customer_repo.find_all()
+        customers_by_email = {c.email: c for c in customers if c.email}
+        customers_by_cpf = {c.cpf: c for c in customers if c.cpf}
+
+        new_orders = []
+        for _, row in self.df.iterrows():
+            customer = customers_by_email.get(row['email']) or customers_by_cpf.get(row['cpf'])
+            if customer:
+                new_order: BuyOrderDataType = {
+                    'order_number': row['order_number'],
+                    'customer': customer,
+                }
+                new_orders.append(self.buy_order_repo.build(data=new_order))
+
+        if new_orders:
+            self.buy_order_repo.bulk_create(new_orders, ignore_conflicts=True)
+
+    def _process_buy_order_details(self) -> None:
+        order_ids = self.df['order_external_id'].unique().tolist()
+        existing_details = self.buy_order_detail_repo.find_by_external_ids(order_ids)
+        details_by_ext = {d.order_external_id: d for d in existing_details}
+
+        payments = self.payment_type_repo.filter_by_names(
+            self.df['payment_type'].unique().tolist()
         )
+        payments_by_name = {p.name: p for p in payments}
 
-        if not customer or not customer.last_order or customer.last_order < row['order_date']:
-            new_customer = self.customer_repo.build(
-                cpf=row['cpf'],
-                email=row['email'],
-                first_name=row['first_name'],
-                last_name=row['last_name'],
-                phone=row['phone'],
-                last_order=row['order_date'],
-                customer_group=customer_group,
+        statuses = self.status_repo.filter_by_names(self.df['status'].unique().tolist())
+        statuses_by_name = {s.name: s for s in statuses}
+
+        new_details, update_details = [], []
+
+        for _, row in self.df.iterrows():
+            payment_type = payments_by_name.get(
+                row['payment_type']
+            ) or self.payment_type_repo.get_or_create(row['payment_type'])
+            status = statuses_by_name.get(row['status']) or self.status_repo.get_or_create(
+                row['status']
             )
-            self.customer_by_email['email'] = new_customer
-            self.customers_by_cpf['cpf'] = new_customer
-            self.customers.append(new_customer)
 
-    def _build_buy_orders(self, row: pd.Series[Any]) -> None:
-        customer = self.customer_by_email.get(row['email']) or self.customers_by_cpf.get(
-            row['cpf']
-        )
+            existing = details_by_ext.get(row['order_external_id'])
+            if not existing:
+                buy_order = BuyOrder.objects.filter(order_number=row['order_number']).first()
+                if buy_order:
+                    new_details.append(
+                        BuyOrderDetail(
+                            buy_order=buy_order,
+                            payment_type=payment_type,
+                            status=status,
+                            order_external_id=row['order_external_id'],
+                            order_date=row['order_date'],
+                            tracking_code=row['tracking_code'],
+                            sold_quantity=row['sold_quantity'],
+                            discount_amount=row['discount_amount'],
+                            shipping_amount=row['shipping_amount'],
+                            total_amount=row['total_amount'],
+                        )
+                    )
+            else:
+                existing.status = status
+                existing.tracking_code = row['tracking_code']
+                update_details.append(existing)
 
-        if not customer:
-            return
-
-        self.buy_orders.append(
-            self.buy_order_repo.build(
-                order_number=row['order_number'],
-                customer=customer,
-            )
-        )
-
-    def _build_buy_orders_details(self, row: pd.Series[Any]) -> None:
-        buy_order = self.buy_order_repo.find_by_order_number(row['order_number'])
-        payment_type = self.payment_type_repo.get_or_create(row['payment_type'])
-        status = self.status_repo.get_or_create(row['status'])
-
-        if not buy_order:
-            return
-
-        self.buy_orders_details.append(
-            self.buy_order_detail_repo.build(
-                buy_order=buy_order,
-                order_external_id=row['order_external_id'],
-                order_date=row['order_date'],
-                payment_type=payment_type,
-                tracking_code=row['tracking_code'],
-                status=status,
-                sold_quantity=row['sold_quantity'],
-                shipping_amount=row['shipping_amount'],
-                discount_amount=row['discount_amount'],
-                total_amount=row['total_amount'],
-            )
-        )
-
-    def _cached_data(self) -> None:
-        self.all_customers = self.customer_repo.find_all()
-        self.customer_by_email = {c.email: c for c in self.all_customers}
-        self.customers_by_cpf = {c.cpf: c for c in self.all_customers}
+        if new_details:
+            self.buy_order_detail_repo.bulk_create(new_details, ignore_conflicts=True)
+        if update_details:
+            self.buy_order_detail_repo.bulk_update(update_details, ['status', 'tracking_code'])
