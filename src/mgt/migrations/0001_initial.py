@@ -104,7 +104,6 @@ class Migration(migrations.Migration):
                 ('discount_amount', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('total_amount', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('sold_quantity', models.PositiveIntegerField()),
-                ('tracking_code', models.CharField(blank=True, max_length=255, null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('buy_order', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='buy_order_detail', to='mgt.buyorder')),

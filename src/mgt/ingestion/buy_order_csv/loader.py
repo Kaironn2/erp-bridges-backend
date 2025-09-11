@@ -124,7 +124,6 @@ class BuyOrderCsvLoader(BaseLoader):
                             status=status,
                             order_external_id=row['order_external_id'],
                             order_date=row['order_date'],
-                            tracking_code=row['tracking_code'],
                             sold_quantity=row['sold_quantity'],
                             discount_amount=row['discount_amount'],
                             shipping_amount=row['shipping_amount'],
@@ -133,10 +132,9 @@ class BuyOrderCsvLoader(BaseLoader):
                     )
             else:
                 existing.status = status
-                existing.tracking_code = row['tracking_code']
                 update_details.append(existing)
 
         if new_details:
             self.buy_order_detail_repo.bulk_create(new_details, ignore_conflicts=True)
         if update_details:
-            self.buy_order_detail_repo.bulk_update(update_details, ['status', 'tracking_code'])
+            self.buy_order_detail_repo.bulk_update(update_details, ['status'])

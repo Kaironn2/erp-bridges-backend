@@ -23,6 +23,7 @@ class BuyOrderCsvExtractor(BaseExtractor):
                 sep=',',
                 dtype=str,
                 encoding='utf-8',
+                usecols=COLUMN_ALIASES.keys(),
             )
             return df
         except FileNotFoundError:

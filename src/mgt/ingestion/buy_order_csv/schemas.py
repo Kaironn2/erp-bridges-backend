@@ -3,7 +3,6 @@ COLUMN_ALIASES = {
     'ID do Pedido': 'order_external_id',
     'Comprado Em': 'order_date',
     'Status': 'status',
-    'Número do Rastreador': 'tracking_code',
     'Qtd. Vendida': 'sold_quantity',
     'Payment Type': 'payment_type',
     'Frete': 'shipping_amount',
