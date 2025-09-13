@@ -59,7 +59,7 @@ class BuyOrderCsvTransformer(BaseTransformer):
 
     def _extract_deadline_days(self, df: pd.DataFrame) -> pd.DataFrame:
         if 'details' in df.columns:
-            df['deadline_days'] = df['details'].str.extract(r'média\s+(\d+)')
+            df['deadline_days'] = df['details'].str.extract(r'média\s+(\d+)')[0].astype(int)
         return df
 
     def _extract_coupon(self, df: pd.DataFrame) -> pd.DataFrame:

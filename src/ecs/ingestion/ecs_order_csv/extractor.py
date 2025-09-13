@@ -6,7 +6,7 @@ from core.typings.file_types import CsvSource
 from .schemas import COLUMN_ALIASES
 
 
-class EcsOrder(BaseExtractor):
+class EcsOrderCsvExtractor(BaseExtractor):
     def __init__(self, csv_file: CsvSource) -> None:
         self.csv_file: CsvSource = csv_file
 

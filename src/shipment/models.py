@@ -13,6 +13,7 @@ class ShippingType(models.Model):
         max_length=10,
         choices=ShippingTypeChoices.choices,
     )
+    extra_deadline_days = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -26,7 +27,9 @@ class ShippingType(models.Model):
 
 class Shipment(models.Model):
     buy_order = models.OneToOneField(BuyOrder, on_delete=models.CASCADE, related_name='shipment')
-    deadline_days = models.IntegerField()
+    deadline_days = models.PositiveIntegerField()
+    customer_deadline = models.DateField(blank=True, null=True)
+    shipping_deadline = models.DateField(blank=True, null=True)
     tracking_code = models.CharField(max_length=100, null=True, blank=True)
     pickup_date = models.DateField(null=True, blank=True)
     delivered_at = models.DateField(null=True, blank=True)
