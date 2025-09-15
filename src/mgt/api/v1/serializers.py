@@ -88,7 +88,6 @@ class BuyOrderDetailSerializer(serializers.ModelSerializer):
             'discount_amount',
             'total_amount',
             'sold_quantity',
-            'tracking_code',
             'created_at',
             'updated_at',
         ]

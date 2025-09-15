@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal, Optional, TypedDict
+from typing import Literal, TypedDict
 
 from mgt.models import BuyOrder, BuyOrderDetail, PaymentType, Status
 
@@ -11,7 +11,6 @@ class BuyOrderDetailData(TypedDict):
     order_external_id: str
     order_date: datetime
     payment_type: PaymentType
-    tracking_code: Optional[str]
     status: Status
     sold_quantity: int
     shipping_amount: Decimal
@@ -19,7 +18,7 @@ class BuyOrderDetailData(TypedDict):
     total_amount: Decimal
 
 
-BuyOrderDetailUpdateFields = Literal['status', 'tracking_code']
+BuyOrderDetailUpdateFields = Literal['status']
 
 
 class BuyOrderDetailRepository:
