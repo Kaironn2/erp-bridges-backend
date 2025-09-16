@@ -34,7 +34,8 @@ INSTALLED_APPS = [
     'django_celery_results',
     'corsheaders',
 
-    'mgt',
+    'buy_order',
+    'customer',
     'reports',
 ]
 
