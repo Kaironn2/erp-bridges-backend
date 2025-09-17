@@ -29,7 +29,17 @@ class CustomerDataType(TypedDict, total=False):
     last_order: Optional[datetime]
 
 
-CustomerUpdateFields = Literal['external_id', 'customer_since', 'last_order', 'customer_group']
+CustomerUpdateFields = Literal[
+    'first_name',
+    'last_name',
+    'email',
+    'cpf',
+    'phone',
+    'external_id',
+    'customer_since',
+    'last_order',
+    'customer_group',
+]
 
 
 class CustomerRepository:
