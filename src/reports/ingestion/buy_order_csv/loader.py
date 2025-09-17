@@ -83,9 +83,6 @@ class BuyOrderCsvLoader(BaseLoader):
         customers_by_email = {c.email: c for c in customers if c.email}
         customers_by_cpf = {c.cpf: c for c in customers if c.cpf}
 
-        order_numbers = self.df['order_number'].unique().tolist()
-        buy_orders_by_number = self._buy_orders_mapping(order_numbers)
-
         payments = self.payment_type_repo.filter_by_names(
             self.df['payment_type'].unique().tolist()
         )
@@ -97,6 +94,7 @@ class BuyOrderCsvLoader(BaseLoader):
         orders = []
 
         for _, row in self.df.iterrows():
+            customer = customers_by_email.get(row['email']) or customers_by_cpf.get(row['cpf'])
             payment_type = payments_by_name.get(
                 row['payment_type']
             ) or self.payment_type_repo.get_or_create(row['payment_type'])
@@ -104,29 +102,20 @@ class BuyOrderCsvLoader(BaseLoader):
                 row['status']
             )
 
-            if buy_orders_by_number:
-                existing = buy_orders_by_number.get(row['order_number'])
-                if not existing:
-                    customer = customers_by_email.get(row['email']) or customers_by_cpf.get(
-                        row['cpf']
-                    )
-                    orders.append(
-                        BuyOrder(
-                            order_number=row['order_number'],
-                            customer=customer,
-                            payment_type=payment_type,
-                            status=status,
-                            order_external_id=row['order_external_id'],
-                            order_date=row['order_date'],
-                            sold_quantity=row['sold_quantity'],
-                            discount_amount=row['discount_amount'],
-                            shipping_amount=row['shipping_amount'],
-                            total_amount=row['total_amount'],
-                        )
-                    )
-                else:
-                    existing.status = status
-                    orders.append(existing)
+            orders.append(
+                BuyOrder(
+                    order_number=row['order_number'],
+                    customer=customer,
+                    payment_type=payment_type,
+                    status=status,
+                    order_id=row['order_id'],
+                    order_date=row['order_date'],
+                    sold_quantity=row['sold_quantity'],
+                    discount_amount=row['discount_amount'],
+                    shipping_amount=row['shipping_amount'],
+                    total_amount=row['total_amount'],
+                )
+            )
 
         if orders:
             self.buy_order_repo.bulk_create(orders)

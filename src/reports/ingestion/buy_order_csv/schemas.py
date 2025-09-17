@@ -1,6 +1,6 @@
 COLUMN_ALIASES = {
     'Pedido #': 'order_number',
-    'ID do Pedido': 'order_external_id',
+    'ID do Pedido': 'order_id',
     'Comprado Em': 'order_date',
     'Status': 'status',
     'Qtd. Vendida': 'sold_quantity',
