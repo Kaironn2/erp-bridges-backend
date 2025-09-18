@@ -131,7 +131,9 @@ class DataFrameUtils:
             if col not in df.columns:
                 continue
 
+            df[col] = df[col].astype(str)
             df[col] = df[col].str.replace(r'\D', '', regex=True)
+            df[col] = df[col].replace('', None)
 
         return df
 

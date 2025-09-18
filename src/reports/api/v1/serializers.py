@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reports.ingestion import REPORT_MAP
+from reports.ingestion.mapping import REPORT_MAP
 
 
 class ReportUploadSerializer(serializers.Serializer):

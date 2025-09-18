@@ -2,12 +2,12 @@ from typing import Literal
 
 from celery import shared_task
 import os
-from reports.ingestion import REPORT_MAP
+from reports.ingestion.mapping import REPORT_MAP
 import logging
 
 logger = logging.getLogger(__name__)
 
-report_type = Literal['mgt_buy_orders_csv', 'mgt_customers_csv']
+report_type = Literal['buy_orders_csv', 'customers_csv']
 
 
 @shared_task
