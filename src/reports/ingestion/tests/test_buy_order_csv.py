@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from django.db.models import Sum
 from pandas.api.types import is_datetime64_any_dtype
 
 from buy_order.models import BuyOrder
@@ -39,7 +40,7 @@ def loaded_buy_orders(transformed_buy_orders_df: pd.DataFrame) -> None:
 def test_extract(raw_buy_orders_df):
     df = raw_buy_orders_df
 
-    rows_len = 10
+    rows_len = 11
 
     assert len(df) == rows_len
     assert set(df.columns) == set(COLUMN_ALIASES.values())
@@ -93,10 +94,50 @@ def test_customer_email_update(loaded_buy_orders):
     assert customer.first_name == 'alan'
 
 
-# @pytest.mark.django_db
-# def test_customer_cpf_update(loaded_buy_orders):
-#     cpf = '82312314727'
-#     customer = Customer.objects.get(cpf=cpf)
+@pytest.mark.django_db
+def test_customer_cpf_update(loaded_buy_orders):
+    cpf = '82312314727'
+    customer = Customer.objects.get(cpf=cpf)
 
-#     assert customer is not None
-#     assert customer.first_name == 'bruna'
+    assert customer.first_name == 'bruna'
+
+
+@pytest.mark.django_db
+def test_customer_name_update(loaded_buy_orders):
+    email = 'letsilvasantos25@gmail.com'
+    customer = Customer.objects.get(email=email)
+
+    assert customer.first_name == 'ana'
+    assert customer.last_name == 'santos silva'
+
+
+@pytest.mark.django_db
+def test_customer_group_update(loaded_buy_orders):
+    email = 'vivi87.monteiro@gmail.com'
+    customer = Customer.objects.get(email=email)
+
+    assert customer.customer_group.name == 'influencer'
+
+
+@pytest.mark.django_db
+def test_customer_amounts(loaded_buy_orders):
+    email = 'vivi87.monteiro@gmail.com'
+    customer = Customer.objects.get(email=email)
+
+    totals = customer.buy_orders.aggregate(
+        total_amount=Sum('total_amount'),
+        shipping_amount=Sum('shipping_amount'),
+        discount_amount=Sum('discount_amount'),
+    )
+
+    assert totals['shipping_amount'] == Decimal('62.87')
+    assert totals['discount_amount'] == Decimal('10.00')
+    assert totals['total_amount'] == Decimal('760.78')
+
+
+@pytest.mark.django_db
+def test_buy_order_status_update(loaded_buy_orders):
+    order_number = '100000010'
+    buy_order = BuyOrder.objects.get(order_number=order_number)
+
+    assert buy_order.status.name == 'enviado'
