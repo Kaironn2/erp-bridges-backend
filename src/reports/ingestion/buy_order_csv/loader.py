@@ -22,7 +22,7 @@ class BuyOrderCsvLoader(BaseLoader):
         with transaction.atomic():
             for _, row in self.df.iterrows():
                 self._upsert_customer(row)
-                self._upser_buy_order(row)
+                self._upsert_buy_order(row)
 
     def _upsert_customer(self, row: pd.Series) -> None:
         group = self.customer_group_repo.get_or_create(row.customer_group)
@@ -45,7 +45,7 @@ class BuyOrderCsvLoader(BaseLoader):
         elif not customer.last_order or customer.last_order < row['order_date']:
             self.customer_repo.update(customer, customer_data)
 
-    def _upser_buy_order(self, row: pd.Series) -> None:
+    def _upsert_buy_order(self, row: pd.Series) -> None:
         buy_order = self.buy_order_repo.find_by_order_number(row.order_number)
         status = self.status_repo.get_or_create(row.status)
 
