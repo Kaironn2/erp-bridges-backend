@@ -29,7 +29,10 @@ class BuyOrderRepository:
         return BuyOrder.objects.all()
 
     def find_by_order_number(self, order_number: str) -> Optional[BuyOrder]:
-        return BuyOrder.objects.get(order_number=order_number)
+        try:
+            return BuyOrder.objects.get(order_number=order_number)
+        except BuyOrder.DoesNotExist:
+            return None
 
     def build(self, data: BuyOrderDataType) -> BuyOrder:
         return BuyOrder(**data)
