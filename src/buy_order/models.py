@@ -30,15 +30,15 @@ class Status(models.Model):
 
 
 class BuyOrder(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='buy_order')
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='buy_orders')
     order_number = models.CharField(unique=True)
     order_id = models.IntegerField(unique=True)
     order_date = models.DateTimeField()
-    status = models.ForeignKey(Status, models.PROTECT, related_name='buy_order')
+    status = models.ForeignKey(Status, models.PROTECT, related_name='buy_orders')
     payment_type = models.ForeignKey(
         PaymentType,
         models.PROTECT,
-        related_name='buy_order',
+        related_name='buy_orders',
     )
     shipping_amount = models.DecimalField(max_digits=10, decimal_places=2)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2)
