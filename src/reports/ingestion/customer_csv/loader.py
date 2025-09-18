@@ -63,6 +63,7 @@ class CustomerCsvLoader(BaseLoader):
             'last_name': row['last_name'],
             'email': row['email'],
             'phone': row['phone'],
+            'postal_code': row['postal_code'],
             'customer_since': row['customer_since'],
             'state': row['state'],
             'country': row['country'],
