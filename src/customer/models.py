@@ -1,4 +1,10 @@
+from typing import TYPE_CHECKING
+
 from django.db import models
+from django.db.models import QuerySet
+
+if TYPE_CHECKING:
+    from buy_order.models import BuyOrder
 
 
 class CustomerGroup(models.Model):
@@ -15,6 +21,7 @@ class CustomerGroup(models.Model):
 
 
 class Customer(models.Model):
+    buy_orders: 'QuerySet[BuyOrder]'
     external_id = models.CharField(unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
