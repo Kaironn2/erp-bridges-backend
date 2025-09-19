@@ -2,8 +2,8 @@ from django.db import models
 
 
 class Company(models.Model):
-    name = models.CharField(max_length=255)
     cnpj = models.CharField(max_length=18, unique=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     ie = models.CharField(blank=True, null=True, unique=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
@@ -20,7 +20,7 @@ class Company(models.Model):
         verbose_name_plural = 'Companhias'
 
     def __str__(self):
-        return self.name
+        return self.cnpj
 
 
 class BankAccount(models.Model):
