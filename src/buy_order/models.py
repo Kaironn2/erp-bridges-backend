@@ -65,6 +65,7 @@ class EcsBuyOrder(models.Model):
     payment_date = models.DateField(blank=True, null=True)
     coupon = models.CharField(max_length=100, blank=True, null=True)
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='ecs_buy_orders')
+    deadline_days = models.PositiveIntegerField()
     ecs_carrier = models.CharField(max_length=100)
     recipient_name = models.CharField(max_length=100)
     recipient_zip_code = models.CharField(max_length=8)
