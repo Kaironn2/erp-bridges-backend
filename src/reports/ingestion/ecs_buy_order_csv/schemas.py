@@ -2,7 +2,7 @@ COLUMN_ALIASES = {
     'Numero da Ordem': 'order_number',
     'Número do Pedido': 'ecs_order_number',
     'ID': 'ecs_order_id',
-    'Observação Interna': 'internal_note',
+    'Observação Interna': 'details',
     'Data do Pagamento': 'payment_date',
     'Nome do contato': 'recipient_name',
     'CEP do contato': 'recipient_zip_code',

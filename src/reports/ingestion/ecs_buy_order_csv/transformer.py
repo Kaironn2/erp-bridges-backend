@@ -5,7 +5,7 @@ from utils.dataframe_utils import DataFrameUtils as dfu
 from utils.load_shipping_methods import load_shipping_methods
 
 
-class BuyOrderCsvTransformer(BaseTransformer):
+class EcsBuyOrderCsvTransformer(BaseTransformer):
     def __init__(self, df: pd.DataFrame):
         self.df = df
 
@@ -14,6 +14,7 @@ class BuyOrderCsvTransformer(BaseTransformer):
         self.df = self._convert_date_columns(self.df)
         self.df = self._keep_only_digits_columns(self.df)
         self.df = self._extract_cnpj_from_details(self.df)
+        self.df.dropna(subset=['cnpj'], inplace=True)
         self.df = self._extract_deadline_days(self.df)
         self.df = self._extract_coupon(self.df)
         self.df = self._replace_columns_values(self.df)
@@ -34,7 +35,7 @@ class BuyOrderCsvTransformer(BaseTransformer):
 
     def _convert_date_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         df['ecs_delivery_date'] = df['ecs_delivery_date'].replace(
-            to_replace=r'^0{4}-0{2}-0{2}\s+0{2}:0{2}:0{2}$', value=None, regex=True
+            to_replace=r'^0{4}-0{2}-0{2}\s+0{2}:0{2}:0{2}', value=None, regex=True
         )
         columns_1 = ['ecs_delivery_date']
 
@@ -59,7 +60,9 @@ class BuyOrderCsvTransformer(BaseTransformer):
 
     def _extract_deadline_days(self, df: pd.DataFrame) -> pd.DataFrame:
         if 'details' in df.columns:
-            df['deadline_days'] = df['details'].str.extract(r'média\s+(\d+)')[0].astype(int)
+            df['deadline_days'] = (
+                df['details'].str.extract(r'média\s+(\d+)')[0].fillna(0).astype(int)
+            )
         return df
 
     def _extract_coupon(self, df: pd.DataFrame) -> pd.DataFrame:

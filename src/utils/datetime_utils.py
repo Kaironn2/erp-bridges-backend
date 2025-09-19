@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Union
 
+import pandas as pd
 from django.utils.timezone import is_naive, make_aware
 from pytz import timezone
 
@@ -14,6 +15,8 @@ def local_to_aware(dt: Union[datetime, None]) -> Union[datetime, None]:
     """
     if dt is None:
         return None
+    if pd.isna(dt):
+        return dt
     if is_naive(dt):
         return make_aware(dt, timezone=SAO_PAULO)
     return dt
