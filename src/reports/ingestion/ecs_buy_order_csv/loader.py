@@ -61,4 +61,4 @@ class EcsBuyOrderCsvLoader(BaseLoader):
 
     def _get_or_create_payment_types(self) -> None:
         payment_types = list(self.df['payment_type'].unique())
-        self.payment_types = self.payment_type_repo.get_or_create_many_by_names(payment_types)
+        self.payment_types = self.payment_type_repo.get_or_create_many_by_name(payment_types)
