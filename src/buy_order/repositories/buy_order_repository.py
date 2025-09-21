@@ -4,14 +4,13 @@ from typing import Optional, TypedDict
 
 from django.db.models.query import QuerySet
 
-from buy_order.models import BuyOrder, PaymentType, Status
+from buy_order.models import BuyOrder, Status
 from customer.models import Customer
 
 
 class BuyOrderDataType(TypedDict):
     order_number: str
     customer: Customer
-    payment_type: PaymentType
     status: Status
     order_id: str
     order_date: datetime

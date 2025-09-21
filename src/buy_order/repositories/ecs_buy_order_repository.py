@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 
-from buy_order.models import BuyOrder, EcsBuyOrder
+from buy_order.models import BuyOrder, EcsBuyOrder, PaymentType
 from company.models import Company
 
 
@@ -10,9 +10,10 @@ class EcsBuyOrderDataType(TypedDict):
     buy_order: BuyOrder
     ecs_order_number: str
     ecs_order_id: str
+    payment_type: PaymentType
     payment_date: datetime
     coupon: str
-    company: Company
+    company: Optional[Company]
     deadline_days: int
     ecs_carrier: str
     recipient_name: str
@@ -29,6 +30,6 @@ class EcsBuyOrderRepository:
 
         obj, _ = EcsBuyOrder.objects.update_or_create(
             ecs_order_id=ecs_order_id,
-            defaults=dict(ecs_buy_order_data),
+            defaults=data,
         )
         return obj
