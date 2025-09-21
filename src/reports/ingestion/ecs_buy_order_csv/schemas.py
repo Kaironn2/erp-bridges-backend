@@ -11,4 +11,5 @@ COLUMN_ALIASES = {
     'Data de Entrega': 'ecs_delivery_date',
     'Transportadora': 'carrier',
     'Forma Frete': 'carrier_type',
+    'Forma de pagamento': 'payment_type',
 }
