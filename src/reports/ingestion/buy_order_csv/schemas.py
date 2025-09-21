@@ -4,7 +4,6 @@ COLUMN_ALIASES = {
     'Comprado Em': 'order_date',
     'Status': 'status',
     'Qtd. Vendida': 'sold_quantity',
-    'Payment Type': 'payment_type',
     'Frete': 'shipping_amount',
     'Desconto': 'discount_amount',
     'Total da Venda': 'total_amount',

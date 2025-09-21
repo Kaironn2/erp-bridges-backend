@@ -1,5 +1,7 @@
 from typing import Dict
 
+from django.db import transaction
+
 from buy_order.models import PaymentType
 
 
@@ -13,3 +15,11 @@ class PaymentTypeRepository:
     def get_or_create(self, name: str) -> PaymentType:
         payment_type, created = PaymentType.objects.get_or_create(name=name)
         return payment_type
+
+    @transaction.atomic
+    def get_or_create_many_by_name(self, names: list[str]) -> dict[str, PaymentType]:
+        objs = []
+        for name in names:
+            obj, _ = PaymentType.objects.get_or_create(name=name)
+            objs.append(obj)
+        return {obj.name: obj for obj in objs}

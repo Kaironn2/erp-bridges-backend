@@ -1,38 +1,10 @@
 from datetime import datetime, timezone
-from pathlib import Path
 
-import pandas as pd
 import pytest
 from pandas.api.types import is_datetime64_any_dtype
 
 from customer.models import Customer
-from reports.ingestion.customer_csv.extractor import CustomerCsvExtractor
-from reports.ingestion.customer_csv.loader import CustomerCsvLoader
 from reports.ingestion.customer_csv.schemas import COLUMN_ALIASES
-from reports.ingestion.customer_csv.transformer import CustomerCsvTransformer
-
-
-@pytest.fixture
-def raw_customers_df(data_tests_folder: Path) -> pd.DataFrame:
-    """Extracts and returns the raw DataFrame from the CSV file."""
-    csv_path = data_tests_folder / 'customers.csv'
-    extractor = CustomerCsvExtractor(csv_file=csv_path)
-    return extractor.extract()
-
-
-@pytest.fixture
-def transformed_customers_df(raw_customers_df: pd.DataFrame) -> pd.DataFrame:
-    """Transforms the raw DataFrame into a clean, ready-to-load format."""
-    transformer = CustomerCsvTransformer(raw_customers_df)
-    return transformer.transform()
-
-
-@pytest.fixture
-@pytest.mark.django_db
-def loaded_customers(transformed_customers_df: pd.DataFrame) -> None:
-    """Loads the transformed DataFrame into the database."""
-    loader = CustomerCsvLoader(transformed_customers_df)
-    loader.load()
 
 
 def test_extract(raw_customers_df):

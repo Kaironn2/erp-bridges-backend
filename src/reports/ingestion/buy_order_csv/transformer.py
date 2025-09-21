@@ -13,12 +13,11 @@ class BuyOrderCsvTransformer(BaseTransformer):
         self.df = self._clean_currency_columns(self.df)
         self.df = self._convert_date_columns(self.df)
         self.df = self._keep_only_digits_columns(self.df)
-        self.df = self._replace_columns_values(self.df)
         self.df = dfu.replace_nulls_with_none(self.df)
         return self.df
 
     def _lower_case_columns(self, df: pd.DataFrame) -> pd.DataFrame:
-        columns = ['first_name', 'last_name', 'email', 'customer_group', 'status', 'payment_type']
+        columns = ['first_name', 'last_name', 'email', 'customer_group', 'status']
         return dfu.lower_case_values(df, columns)
 
     def _clean_currency_columns(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -34,14 +33,3 @@ class BuyOrderCsvTransformer(BaseTransformer):
     def _keep_only_digits_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         columns = ['cpf', 'phone']
         return dfu.keep_only_digits(df, columns)
-
-    def _replace_columns_values(self, df: pd.DataFrame) -> pd.DataFrame:
-        mapping = {
-            'payment_type': {
-                'pix': 'pix',
-                'cartão': 'cartão de crédito',
-                'boleto': 'boleto bancário',
-                'necessário': 'saldo',
-            }
-        }
-        return dfu.replace_values(df, mapping, contains=True)
