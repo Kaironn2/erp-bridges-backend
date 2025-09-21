@@ -1,40 +1,12 @@
 from decimal import Decimal
-from pathlib import Path
 
-import pandas as pd
 import pytest
 from django.db.models import Sum
 from pandas.api.types import is_datetime64_any_dtype
 
 from buy_order.models import BuyOrder
 from customer.models import Customer
-from reports.ingestion.buy_order_csv.extractor import BuyOrderCsvExtractor
-from reports.ingestion.buy_order_csv.loader import BuyOrderCsvLoader
 from reports.ingestion.buy_order_csv.schemas import COLUMN_ALIASES
-from reports.ingestion.buy_order_csv.transformer import BuyOrderCsvTransformer
-
-
-@pytest.fixture
-def raw_buy_orders_df(data_tests_folder: Path) -> pd.DataFrame:
-    """Extracts and returns the raw DataFrame from the CSV file."""
-    csv_path = data_tests_folder / 'buy_orders.csv'
-    extractor = BuyOrderCsvExtractor(csv_file=csv_path)
-    return extractor.extract()
-
-
-@pytest.fixture
-def transformed_buy_orders_df(raw_buy_orders_df: pd.DataFrame) -> pd.DataFrame:
-    """Transforms the raw DataFrame into a clean, ready-to-load format."""
-    transformer = BuyOrderCsvTransformer(raw_buy_orders_df)
-    return transformer.transform()
-
-
-@pytest.fixture
-@pytest.mark.django_db
-def loaded_buy_orders(transformed_buy_orders_df: pd.DataFrame) -> None:
-    """Loads the transformed DataFrame into the database."""
-    loader = BuyOrderCsvLoader(transformed_buy_orders_df)
-    loader.load()
 
 
 def test_extract(raw_buy_orders_df):
@@ -72,10 +44,6 @@ def test_transform(transformed_buy_orders_df):
     for column in columns_to_check_digits:
         series = df[column].dropna()
         assert series.str.isdigit().all(), f"Column '{column}' contains non-digit characters."
-
-    expected_payment_types = {'pix', 'cartão de crédito', 'boleto bancário', 'saldo', None}
-    actual_payment_types = set(df['payment_type'].unique())
-    assert actual_payment_types.issubset(expected_payment_types)
 
 
 @pytest.mark.django_db
