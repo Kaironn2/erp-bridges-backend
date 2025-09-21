@@ -21,6 +21,7 @@ class CustomerGroup(models.Model):
 
 
 class Customer(models.Model):
+    id: int
     buy_orders: 'QuerySet[BuyOrder]'
     external_id = models.CharField(unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=255)
