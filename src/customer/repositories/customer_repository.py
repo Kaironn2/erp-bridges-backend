@@ -2,6 +2,7 @@ from collections.abc import Sequence
 from datetime import datetime
 from typing import Optional, Literal, TypedDict
 
+from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
 
 from customer.models import Customer, CustomerGroup
@@ -70,9 +71,17 @@ class CustomerRepository:
     def create(self, customer_data: CustomerDataType) -> Customer:
         return Customer.objects.create(**customer_data)
 
-    def update(self, customer: Customer, customer_data: CustomerDataType) -> Customer:
-        for attr, value in customer_data.items():
-            setattr(customer, attr, value)
+    def update(self, customer: Customer, data: CustomerDataType) -> Customer:
+        new_email = data.get('email')
+        new_cpf = data.get('cpf')
+
+        if new_email and Customer.objects.exclude(id=customer.id).filter(email=new_email).exists():
+            raise ValidationError(f'E-mail {new_email} already in use')
+        if new_cpf and Customer.objects.exclude(id=customer.id).filter(cpf=new_cpf).exists():
+            raise ValidationError(f'CPF {new_cpf} already in use')
+
+        for key, value in data.items():
+            setattr(customer, key, value)
         customer.save()
         return customer
 
