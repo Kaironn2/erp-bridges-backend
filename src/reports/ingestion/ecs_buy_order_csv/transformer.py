@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from core.ingestion.base_transformer import BaseTransformer
@@ -14,7 +15,6 @@ class EcsBuyOrderCsvTransformer(BaseTransformer):
         self.df = self._convert_date_columns(self.df)
         self.df = self._keep_only_digits_columns(self.df)
         self.df = self._extract_cnpj_from_details(self.df)
-        self.df.dropna(subset=['cnpj'], inplace=True)
         self.df = self._extract_deadline_days(self.df)
         self.df = self._extract_coupon(self.df)
         self.df = self._replace_columns_values(self.df)
@@ -30,6 +30,7 @@ class EcsBuyOrderCsvTransformer(BaseTransformer):
             'details',
             'carrier',
             'carrier_type',
+            'payment_type',
         ]
         return dfu.lower_case_values(df, columns)
 
@@ -55,7 +56,11 @@ class EcsBuyOrderCsvTransformer(BaseTransformer):
 
     def _extract_cnpj_from_details(self, df: pd.DataFrame) -> pd.DataFrame:
         if 'details' in df.columns:
-            df['cnpj'] = df['details'].str.extract(r'cnpj_(\d{14})')
+            df['cnpj'] = np.where(
+                df['details'].str.contains('free', case=False, na=False),
+                np.nan,
+                df['details'].str.extract(r'cnpj_(\d{14})')[0],
+            )
         return df
 
     def _extract_deadline_days(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -66,17 +71,32 @@ class EcsBuyOrderCsvTransformer(BaseTransformer):
         return df
 
     def _extract_coupon(self, df: pd.DataFrame) -> pd.DataFrame:
-        if 'details' in df.columns:
-            pattern = r'Meio de pagamento:[^\S\r\n]*\S+\s+(\S+)'
-            df['coupon'] = df['details'].str.extract(pattern, expand=False)
+        PAYMENTS = ['pagarme5_cc', 'pagarme5_pix', 'pagarme5_boleto', 'free']
 
-            df['coupon'] = df['coupon'].str.strip().str.rstrip('.,;:')
-            df['coupon'] = df['coupon'].where(df['coupon'].notna(), None)
+        def get_coupon(details: str) -> str | None:
+            if not isinstance(details, str) or not details.strip():
+                return None
+            parts = details.split()
+            last = parts[-1]
+            return None if last in PAYMENTS else last
+
+        df['coupon'] = df['details'].apply(get_coupon)
         return df
 
     def _replace_columns_values(self, df: pd.DataFrame) -> pd.DataFrame:
-        mapping = {'carrier': load_shipping_methods()}
-        return dfu.replace_values(df, mapping, contains=True)
+        mapping_1 = {'carrier': load_shipping_methods()}
+        df = dfu.replace_values(df, mapping_1, contains=True)
+
+        mapping_2 = {
+            'payment_type': {
+                'pix': 'pix',
+                'cartão': 'cartão de crédito',
+                'boleto': 'boleto bancário',
+                'loja': 'saldo',
+            }
+        }
+
+        return dfu.replace_values(df, mapping_2, contains=True)
 
     def _replace_carrier_with_carrier_type(self, df: pd.DataFrame) -> pd.DataFrame:
         if 'carrier' in df.columns and 'carrier_type' in df.columns:

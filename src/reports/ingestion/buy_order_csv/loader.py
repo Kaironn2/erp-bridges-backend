@@ -55,15 +55,16 @@ class BuyOrderCsvLoader(BaseLoader):
             return
 
         customer = self.customer_repo.find_by_email_or_cpf(email=row.email)
-        payment_type = self.payment_type_repo.get_or_create(row.payment_type)
 
-        if not customer or not status or not payment_type:
-            return
+        if not customer:
+            raise Exception('Customer does not exists')
+
+        if not status:
+            raise Exception('Status does not exists')
 
         buy_order_data: BuyOrderDataType = {
             'order_number': row.order_number,
             'customer': customer,
-            'payment_type': payment_type,
             'status': status,
             'order_id': row.order_id,
             'order_date': row.order_date,
