@@ -36,11 +36,6 @@ class BuyOrder(models.Model):
     order_id = models.IntegerField(unique=True)
     order_date = models.DateTimeField()
     status = models.ForeignKey(Status, models.PROTECT, related_name='buy_orders')
-    payment_type = models.ForeignKey(
-        PaymentType,
-        models.PROTECT,
-        related_name='buy_orders',
-    )
     shipping_amount = models.DecimalField(max_digits=10, decimal_places=2)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -62,9 +57,16 @@ class EcsBuyOrder(models.Model):
     )
     ecs_order_id = models.CharField(max_length=50)
     ecs_order_number = models.CharField(max_length=50)
+    payment_type = models.ForeignKey(
+        PaymentType,
+        models.PROTECT,
+        related_name='buy_orders',
+    )
     payment_date = models.DateField(blank=True, null=True)
     coupon = models.CharField(max_length=100, blank=True, null=True)
-    company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name='ecs_buy_orders')
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, related_name='ecs_buy_orders', blank=True, null=True
+    )
     deadline_days = models.PositiveIntegerField()
     ecs_carrier = models.CharField(max_length=100)
     recipient_name = models.CharField(max_length=100)
