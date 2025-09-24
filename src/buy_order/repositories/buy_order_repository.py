@@ -33,6 +33,9 @@ class BuyOrderRepository:
         except BuyOrder.DoesNotExist:
             return None
 
+    def find_by_order_numbers(self, order_numbers: list[str]) -> QuerySet[BuyOrder]:
+        return BuyOrder.objects.filter(order_number__in=order_numbers)
+
     def build(self, data: BuyOrderDataType) -> BuyOrder:
         return BuyOrder(**data)
 
