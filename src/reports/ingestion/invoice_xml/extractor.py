@@ -1,5 +1,7 @@
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, Union
+
 import pandas as pd
 
 from core.ingestion.base_extractor import BaseExtractor
@@ -34,23 +36,29 @@ class InvoiceXmlExtractor(BaseExtractor):
     def _map_invoice_data(self, xml: dict[str, Any]) -> dict[str, Any]:
         infNFe = xml['nfeProc']['NFe']['infNFe']
         ide = infNFe['ide']
-        recipient = infNFe.get('entrega', {})
+        recipient = infNFe.get('dest', {})
+
+        det = infNFe['det']
+        if isinstance(det, dict):
+            det = [det]
 
         invoice_data = {
+            'order_number': det[0]['prod'].get('xPed'),
             'access_key': infNFe['@Id'].replace('NFe', ''),
             'number': ide.get('nNF'),
             'operation_nature': ide.get('natOp'),
-            'cfop': infNFe['det'][0]['prod'].get('CFOP'),
+            'cfop': det[0]['prod'].get('CFOP'),
             'issue_date': pd.to_datetime(ide.get('dhEmi')).date(),
-            'shipping_amount': float(infNFe['total']['ICMSTot'].get('vFrete', 0)),
-            'total_amount': float(infNFe['total']['ICMSTot'].get('vNF', 0)),
+            'shipping_amount': Decimal(infNFe['total']['ICMSTot'].get('vFrete', 0)),
+            'total_amount': Decimal(infNFe['total']['ICMSTot'].get('vNF', 0)),
+            'cnpj': infNFe['emit'].get('CNPJ'),
         }
 
         recipient_data = {
             'cpf': recipient.get('CPF'),
             'name': recipient.get('xNome'),
             'street': recipient.get('enderDest', {}).get('xLgr'),
-            'number': recipient.get('enderDest', {}).get('nro'),
+            'street_number': recipient.get('enderDest', {}).get('nro'),
             'complement': recipient.get('enderDest', {}).get('xCpl'),
             'neighborhood': recipient.get('enderDest', {}).get('xBairro'),
             'city': recipient.get('enderDest', {}).get('xMun'),
