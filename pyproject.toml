@@ -16,6 +16,7 @@ dependencies = [
     "pandas>=2.3.1",
     "pydantic[email]>=2.11.7",
     "python-decouple>=3.8",
+    "xmltodict>=1.0.2",
 ]
 
 [dependency-groups]
