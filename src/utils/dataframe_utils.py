@@ -190,7 +190,7 @@ class DataFrameUtils:
 
     @staticmethod
     def convert_dataframe_datetimes_to_aware(
-        df: pd.DataFrame, datetime_columns: list
+        df: pd.DataFrame, datetime_columns: list[str]
     ) -> pd.DataFrame:
         """
         Converts data columns in DataFrame to time zone awareness (America/Sao_Paulo).
